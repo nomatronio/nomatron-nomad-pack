@@ -6,9 +6,9 @@ Nomatron is an operational control plane for HashiCorp Nomad. This pack deploys 
 
 This pack is the **primary deployment mechanism** and **reference architecture** for running Nomatron on Nomad.
 
-**Install nomad-pack, get this pack, plan, and run:** see the [nomatron-pack repository README](https://github.com/nomatronio/nomatron-pack/blob/main/README.md#install-and-use-nomad-pack).
+**Install nomad-pack, get this pack, plan, and run:** see the [nomatron-nomad-pack repository README](https://github.com/nomatronio/nomatron-nomad-pack/blob/main/README.md#install-and-use-nomad-pack).
 
-**Platform setup (VM, firewall, Docker, CNI, load balancing):** [docs](https://github.com/nomatronio/nomatron-pack/tree/main/docs/README.md).
+**Platform setup (VM, firewall, Docker, CNI, load balancing):** [docs](https://github.com/nomatronio/nomatron-nomad-pack/tree/main/docs/README.md).
 
 ---
 
@@ -68,9 +68,9 @@ Nomad **1.6+** with at least one client that can run the job. Other requirements
 | Mode | Nomad drivers | Client software | Network | Host volumes | License / secrets |
 |---|---|---|---|---|---|
 | **`provision`** (lab) | **docker** | Docker + **CNI bridge** | `network_mode=bridge` | Postgres data volume | Required |
-| **`byodb`** production/HA | **docker** or **exec** | Docker if `runtime=docker`; exec if `runtime=binary` | Usually `bridge` (or `standard` for macOS BYODB) | None for Nomatron | Required ([or Nomad Variables / Vault](https://github.com/nomatronio/nomatron-pack/blob/main/docs/common/secrets.md)) |
+| **`byodb`** production/HA | **docker** or **exec** | Docker if `runtime=docker`; exec if `runtime=binary` | Usually `bridge` (or `standard` for macOS BYODB) | None for Nomatron | Required ([or Nomad Variables / Vault](https://github.com/nomatronio/nomatron-nomad-pack/blob/main/docs/common/secrets.md)) |
 
-Full client setup walkthrough: [Nomad client setup](https://github.com/nomatronio/nomatron-pack/tree/main/docs/common/nomad-client-setup.md).
+Full client setup walkthrough: [Nomad client setup](https://github.com/nomatronio/nomatron-nomad-pack/tree/main/docs/common/nomad-client-setup.md).
 
 ### Try Nomatron (not the Nomad pack)
 
@@ -88,9 +88,9 @@ Use this pack when you already run Nomad and want Nomatron scheduled alongside y
 
 ### Production / HA
 
-- **Dedicated Nomad clients:** [node_pool, client meta, and constraints](https://github.com/nomatronio/nomatron-pack/tree/main/docs/common/dedicated-nodes-and-placement.md)
-- **Load balancing:** [ALB vs Traefik vs direct access](https://github.com/nomatronio/nomatron-pack/tree/main/docs/common/load-balancing.md)
-- **CNI bridge plugin** when `network_mode=bridge` — see [Nomad client setup](https://github.com/nomatronio/nomatron-pack/tree/main/docs/common/nomad-client-setup.md)
+- **Dedicated Nomad clients:** [node_pool, client meta, and constraints](https://github.com/nomatronio/nomatron-nomad-pack/tree/main/docs/common/dedicated-nodes-and-placement.md)
+- **Load balancing:** [ALB vs Traefik vs direct access](https://github.com/nomatronio/nomatron-nomad-pack/tree/main/docs/common/load-balancing.md)
+- **CNI bridge plugin** when `network_mode=bridge` — see [Nomad client setup](https://github.com/nomatronio/nomatron-nomad-pack/tree/main/docs/common/nomad-client-setup.md)
 - **Host volumes** when `database_mode=provision` only
 
 ### macOS (`nomad agent -dev`)
@@ -112,17 +112,17 @@ CNI bridge does not work on macOS. Use BYODB with **`network_mode=standard`**. S
 
 Required for `network_mode=bridge` (`database_mode=provision`, most production Linux jobs).
 
-See [nomad client setup](https://github.com/nomatronio/nomatron-pack/tree/main/docs/common/nomad-client-setup.md). Install CNI plugins and set `client { cni_path = "/opt/cni/bin" }` on each Linux client.
+See [nomad client setup](https://github.com/nomatronio/nomatron-nomad-pack/tree/main/docs/common/nomad-client-setup.md). Install CNI plugins and set `client { cni_path = "/opt/cni/bin" }` on each Linux client.
 
 ### Nomad version requirements
 
 Save each block below as a `*.vars.hcl` file and pass it with `nomad-pack run --var-file=...`. Replace `REPLACE-*` placeholders before deploy. Do not commit real secrets.
 
-**Lab quickstart:** copy [examples/provision.vars.hcl.example](https://github.com/nomatronio/nomatron-pack/blob/main/examples/provision.vars.hcl.example), fill in secrets, then `nomad-pack run --var-file=your.vars.hcl .`.
+**Lab quickstart:** copy [examples/provision.vars.hcl.example](https://github.com/nomatronio/nomatron-nomad-pack/blob/main/examples/provision.vars.hcl.example), fill in secrets, then `nomad-pack run --var-file=your.vars.hcl .`.
 
 ### Dedicated client placement
 
-Merge into production or HA vars. Client agent must set matching `node_pool` and `meta` — see [dedicated nodes guide](https://github.com/nomatronio/nomatron-pack/tree/main/docs/common/dedicated-nodes-and-placement.md).
+Merge into production or HA vars. Client agent must set matching `node_pool` and `meta` — see [dedicated nodes guide](https://github.com/nomatronio/nomatron-nomad-pack/tree/main/docs/common/dedicated-nodes-and-placement.md).
 
 The pack always constrains to Linux clients (`attr.kernel.name = linux`). In `-var-file` HCL, escape Nomad interpolations as `$${...}` so nomad-pack does not treat them as variables.
 
@@ -586,7 +586,7 @@ For HA with binary runtime, add `runtime = "binary"` and `binary_*` settings to 
 
 ## Load balancer
 
-See [load balancing guide](https://github.com/nomatronio/nomatron-pack/tree/main/docs/common/load-balancing.md).
+See [load balancing guide](https://github.com/nomatronio/nomatron-nomad-pack/tree/main/docs/common/load-balancing.md).
 
 | Mode | When to use |
 |---|---|
@@ -596,7 +596,7 @@ See [load balancing guide](https://github.com/nomatronio/nomatron-pack/tree/main
 
 **Cloud production default:** ALB → each client on **4649** — no Traefik required.
 
-Host Agent gRPC is a **separate TCP** path (`register_grpc_service`, `agent_grpc_advertise_addr`). See [Host Agent gRPC](https://github.com/nomatronio/nomatron-pack/blob/main/docs/common/load-balancing.md#host-agent-grpc-traefik-tcp).
+Host Agent gRPC is a **separate TCP** path (`register_grpc_service`, `agent_grpc_advertise_addr`). See [Host Agent gRPC](https://github.com/nomatronio/nomatron-nomad-pack/blob/main/docs/common/load-balancing.md#host-agent-grpc-traefik-tcp).
 
 ### TLS
 
@@ -621,7 +621,7 @@ server = {
 }
 ```
 
-Advanced: set `server.tls_enabled = true` for origin TLS (required for Host Agent gRPC passthrough). Leave `tls_cert_file` / `tls_key_file` empty to load PEMs from Nomad Variables or Vault — see [secrets](https://github.com/nomatronio/nomatron-pack/blob/main/docs/common/secrets.md#origin-tls-pems-optional). Traefik then uses HTTPS to Nomatron; edge TLS (ALB, Pinggy) can stay in front.
+Advanced: set `server.tls_enabled = true` for origin TLS (required for Host Agent gRPC passthrough). Leave `tls_cert_file` / `tls_key_file` empty to load PEMs from Nomad Variables or Vault — see [secrets](https://github.com/nomatronio/nomatron-nomad-pack/blob/main/docs/common/secrets.md#origin-tls-pems-optional). Traefik then uses HTTPS to Nomatron; edge TLS (ALB, Pinggy) can stay in front.
 
 ### CSRF and `trusted_origins`
 
@@ -666,7 +666,7 @@ Choose how secrets reach the Nomatron task:
 | **`vault`** | Production with HashiCorp Vault |
 | **`pack_vars`** | Homelab / quickstart — pass via `-var-file`; **not for production** |
 
-Full setup: [Secrets management guide](https://github.com/nomatronio/nomatron-pack/blob/main/docs/common/secrets.md).
+Full setup: [Secrets management guide](https://github.com/nomatronio/nomatron-nomad-pack/blob/main/docs/common/secrets.md).
 
 ### Keys (all backends)
 
@@ -722,7 +722,7 @@ Generate `encryption_key` and `serf.encrypt_key` yourself. For production, store
 ## Key variables
 
 - `secrets_backend` — `pack_vars`, `nomad_var`, or `vault`
-- `secret_change_mode` — Nomad template `change_mode` for runtime secrets/TLS (`""` → `noop` when `count > 1`, `restart` when `count = 1`; see [Secrets management](https://github.com/nomatronio/nomatron-pack/blob/main/docs/common/secrets.md))
+- `secret_change_mode` — Nomad template `change_mode` for runtime secrets/TLS (`""` → `noop` when `count > 1`, `restart` when `count = 1`; see [Secrets management](https://github.com/nomatronio/nomatron-nomad-pack/blob/main/docs/common/secrets.md))
 - `deployment_profile` — `quickstart`, `production`, or `ha`
 - `database_mode` — `provision` (lab default) or `byodb`
 - `runtime` — `docker` or `binary`
@@ -747,7 +747,7 @@ Run `nomad-pack info .` (or `nomad-pack info nomatron` from the registry) for th
 | 4650 | Agent gRPC (task listen port; Traefik TCP entrypoint when using Host Agents) |
 | 7946 | Serf gossip (HA) |
 
-Host Agents enroll over HTTPS and then dial **gRPC over TCP**. Do not advertise the HTTPS reverse proxy (`:443`) as the gRPC address — set `agent_grpc_advertise_addr` and `register_grpc_service`. See [Host Agent gRPC](https://github.com/nomatronio/nomatron-pack/blob/main/docs/common/load-balancing.md#host-agent-grpc-traefik-tcp).
+Host Agents enroll over HTTPS and then dial **gRPC over TCP**. Do not advertise the HTTPS reverse proxy (`:443`) as the gRPC address — set `agent_grpc_advertise_addr` and `register_grpc_service`. See [Host Agent gRPC](https://github.com/nomatronio/nomatron-nomad-pack/blob/main/docs/common/load-balancing.md#host-agent-grpc-traefik-tcp).
 
 Leave `serf.advertise_addr` empty. The group port label `serf` interpolates:
 
@@ -776,7 +776,7 @@ Starting points for dedicated clients (2 vCPU, 4 GiB RAM minimum per node):
 | **ha** | 3 | `m7i.large` × 3 | `e2-standard-2` × 3 | `Standard_D2s_v5` × 3 |
 | **quickstart** | 1 | `t3.large` | `e2-standard-2` | `Standard_D2s_v5` |
 
-Full platform guides: [docs](https://github.com/nomatronio/nomatron-pack/tree/main/docs/README.md).
+Full platform guides: [docs](https://github.com/nomatronio/nomatron-nomad-pack/tree/main/docs/README.md).
 
 ---
 
@@ -792,12 +792,12 @@ Full platform guides: [docs](https://github.com/nomatronio/nomatron-pack/tree/ma
 
 ## License
 
-This pack is [MPL-2.0](https://github.com/nomatronio/nomatron-pack/blob/main/LICENSE). Deploying Nomatron requires a valid [Nomatron license key](https://nomatron.io) in `secrets.license_key`.
+This pack is [MPL-2.0](https://github.com/nomatronio/nomatron-nomad-pack/blob/main/LICENSE). Deploying Nomatron requires a valid [Nomatron license key](https://nomatron.io) in `secrets.license_key`.
 
 ## References
 
-- [nomatron-pack README](https://github.com/nomatronio/nomatron-pack/blob/main/README.md) — install and use nomad-pack
-- [Platform setup guides](https://github.com/nomatronio/nomatron-pack/tree/main/docs)
+- [nomatron-nomad-pack README](https://github.com/nomatronio/nomatron-nomad-pack/blob/main/README.md) — install and use nomad-pack
+- [Platform setup guides](https://github.com/nomatronio/nomatron-nomad-pack/tree/main/docs)
 - [Nomad Pack documentation](https://developer.hashicorp.com/nomad/tools/nomad-pack)
 - [Nomatron AWS reference architecture](https://github.com/nomatronio/reference-architecture/tree/main/aws)
 - [Nomatron container images](https://github.com/nomatronio/nomatron-releases)
