@@ -1,10 +1,10 @@
-# Contributing to nomatron-pack
+# Contributing to nomatron-nomad-pack
 
 ## Repository layout
 
 ```text
-nomatron-pack/
-├── packs/nomatron/          # Synced to community registry — 6 items only
+nomatron-nomad-pack/
+├── packs/nomatron/          # The pack — 6 items only
 │   ├── templates/
 │   ├── variables.hcl
 │   ├── metadata.hcl
@@ -18,8 +18,6 @@ nomatron-pack/
 ├── LICENSE
 └── .github/
 ```
-
-The sync script copies the registry pack files plus `.ci/vars-*.hcl` (placeholder secrets so HashiCorp `validate.sh` can render the pack). `docs/` and `examples/` never leave this repository.
 
 ## Day-to-day development
 
@@ -38,35 +36,4 @@ Do **not** run `nomad-pack fmt` on this pack. It rewrites Consul Template `{{` /
 4. Bump `pack.version` in [`packs/nomatron/metadata.hcl`](packs/nomatron/metadata.hcl) and update [`packs/nomatron/CHANGELOG.md`](packs/nomatron/CHANGELOG.md).
 5. Open a PR.
 
-When editing [`packs/nomatron/README.md`](packs/nomatron/README.md), keep Nomatron-specific content only; put nomad-pack install/usage in the [root README](README.md). Link to `docs/` with absolute GitHub URLs so links work from the community registry cache.
-
-## Publishing to the community registry
-
-```bash
-./.github/scripts/sync-community-registry.sh \
-  packs/nomatron \
-  ../nomad-pack-community-registry/packs/nomatron
-```
-
-Registry layout:
-
-```text
-packs/nomatron/
-├── templates/
-├── variables.hcl
-├── metadata.hcl
-├── outputs.tpl
-├── README.md
-└── CHANGELOG.md
-```
-
-On **`v*` tag** push, [`.github/workflows/sync-community-registry.yml`](.github/workflows/sync-community-registry.yml) validates, syncs, and opens an upstream PR.
-
-**Secret:** `COMMUNITY_REGISTRY_SYNC_TOKEN` on `nomatronio/nomatron-pack`.
-
-Local dry-run:
-
-```bash
-./.github/scripts/sync-community-registry.sh packs/nomatron /tmp/nomatron-sync-test
-find /tmp/nomatron-sync-test
-```
+When editing [`packs/nomatron/README.md`](packs/nomatron/README.md), keep Nomatron-specific content only; put nomad-pack install/usage in the [root README](README.md). Link to `docs/` with absolute GitHub URLs so links still work when the pack is fetched through `nomad-pack registry add`.

@@ -1,18 +1,18 @@
-# nomatron-pack
+# nomatron-nomad-pack
 
 Official [Nomad Pack](https://developer.hashicorp.com/nomad/tools/nomad-pack) for deploying [Nomatron](https://nomatron.io) on HashiCorp Nomad.
 
 **Nomatron pack docs:** [packs/nomatron/README.md](packs/nomatron/README.md) — deployment profiles, variables, example HCL, and Nomatron-specific guidance.
 
-**Platform setup guides:** [docs/README.md](docs/README.md) — AWS, Azure, GCP, Proxmox, OpenStack, VMware (repo only, not synced to the community registry).
+**Platform setup guides:** [docs/README.md](docs/README.md) — AWS, Azure, GCP, Proxmox, OpenStack, VMware (repo only).
 
 Maintainers: [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ## Repository layout
 
 ```text
-nomatron-pack/
-├── packs/nomatron/     # Synced to community registry (templates, vars, README, …)
+nomatron-nomad-pack/
+├── packs/nomatron/     # The pack (templates, vars, README, …)
 ├── docs/               # Platform guides (repo only)
 ├── examples/           # Copy of example vars (repo only; HCL also in pack README)
 ├── .ci/                # CI fixtures (repo only)
@@ -60,30 +60,22 @@ You need permission to register jobs in the target namespace (default `default`)
 
 ### 3. Get the Nomatron pack
 
-**The Nomatron pack is not yet in the HashiCorp community registry** (a PR is planned). When you first run `nomad-pack list`, the CLI downloads the [Nomad Pack Community Registry](https://github.com/hashicorp/nomad-pack-community-registry) — Nomatron will appear there after publish.
+Get the pack from this repository, either by cloning it or by adding it as a custom `nomad-pack` registry.
 
 #### Option A — Clone and run locally
 
 ```bash
-git clone https://github.com/nomatronio/nomatron-pack.git
-cd nomatron-pack/packs/nomatron
+git clone https://github.com/nomatronio/nomatron-nomad-pack.git
+cd nomatron-nomad-pack/packs/nomatron
 
 nomad-pack info .
 ```
 
-#### Option B — Default registry (after publish)
-
-```bash
-nomad-pack registry update default
-nomad-pack info nomatron
-nomad-pack run nomatron --var-file=production.vars.hcl
-```
-
-#### Option C — Custom registry (this repo)
+#### Option B — Custom registry (this repo)
 
 ```bash
 nomad-pack registry add nomatronio \
-  github.com/nomatronio/nomatron-pack \
+  github.com/nomatronio/nomatron-nomad-pack \
   --target=nomatron
 
 nomad-pack list --registry=nomatronio
@@ -94,7 +86,7 @@ Pin a release:
 
 ```bash
 nomad-pack registry add nomatronio \
-  github.com/nomatronio/nomatron-pack \
+  github.com/nomatronio/nomatron-nomad-pack \
   --target=nomatron \
   --ref=v0.2.0
 ```

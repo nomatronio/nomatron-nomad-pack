@@ -80,7 +80,7 @@
 - **Secrets backends:** `secrets_backend` supports `pack_vars` (default), `nomad_var` (recommended for production), and `vault`. Runtime secrets are injected via Nomad template blocks — not stored in the job specification.
 - **Production validation:** `deployment_profile=production|ha` now requires `server.trusted_origins`, and `http_port_static` when `load_balancer_mode=none`.
 - **HA runbook:** post-deploy output documents one-time database initialization for HA.
-- **Secrets guide:** [docs/common/secrets.md](https://github.com/nomatronio/nomatron-pack/blob/main/docs/common/secrets.md)
+- **Secrets guide:** [docs/common/secrets.md](https://github.com/nomatronio/nomatron-nomad-pack/blob/main/docs/common/secrets.md)
 - Example vars: `production.byodb.nomad-var.vars.hcl.example`, `production.byodb.vault.vars.hcl.example`
 
 ### Removed
