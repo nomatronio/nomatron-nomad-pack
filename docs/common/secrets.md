@@ -170,7 +170,9 @@ Key names are configurable via `secrets_nomad_var.keys` and `secrets_vault.keys`
 
 ## Homelab / CI (`pack_vars`)
 
-For local development, pass secrets via a gitignored `*.vars.hcl`:
+`nomad-pack render` (and `plan` / `run`) will print or store the rendered job, including every secret you put in pack variables. The CLI writes the job to stdout even when you pass `-o`. Do not use `pack_vars` with real secrets. For any shared or production cluster, use `secrets_backend=nomad_var` or `vault` so secrets come only from a Nomad Variable or Vault at runtime.
+
+For local development, pass placeholders via a gitignored `*.vars.hcl`:
 
 ```bash
 nomad-pack run --var-file=mac-dev.vars.hcl .

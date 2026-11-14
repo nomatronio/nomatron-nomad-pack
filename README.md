@@ -51,7 +51,7 @@ From a machine that can reach your Nomad servers:
 
 ```bash
 export NOMAD_ADDR=https://nomad.example.com:4646   # your Nomad HTTP API
-export NOMAD_TOKEN=<token>                          # required when ACLs are enabled
+export NOMAD_TOKEN="$NOMAD_TOKEN"                    # required when ACLs are enabled
 
 nomad node status    # confirm connectivity
 ```
@@ -149,7 +149,7 @@ nomad-pack status
 | Command | Purpose |
 |---|---|
 | `nomad-pack info .` | Pack metadata and variable reference |
-| `nomad-pack render --var-file=... .` | Print rendered Nomad job HCL |
+| `nomad-pack render --var-file=... .` | Print rendered Nomad job HCL. With `secrets_backend=pack_vars` this prints secrets (even when you also pass `-o`). Prefer `nomad_var` or `vault` so the rendered job contains only a Variable or Vault path. |
 | `nomad-pack status` | List pack deployments registered with this CLI |
 | `nomad-pack destroy nomatron` | Tear down jobs created by a pack deployment |
 | `nomad-pack fmt .` | Format pack templates |

@@ -680,6 +680,8 @@ Full setup: [Secrets management guide](https://github.com/nomatronio/nomatron-no
 
 ### `pack_vars` (homelab only)
 
+`nomad-pack render` prints the rendered job, including these values, even when you also pass `-o`. Use this backend only with placeholders in a gitignored vars file. Production should use `nomad_var` or `vault`.
+
 | Variable | Description |
 |---|---|
 | `secrets.encryption_key` | Same as `encryption_key` above |

@@ -1,4 +1,10 @@
 [[ template "validate_deployment" . ]]
+[[- if eq (var "secrets_backend" .) "pack_vars" ]]
+# WARNING: secrets_backend=pack_vars embeds secrets in this job specification.
+# `nomad-pack render` prints the full job to stdout, even when you also pass -o.
+# Use secrets_backend=nomad_var or vault so values come only from a Nomad
+# Variable or Vault and do not appear in the rendered job.
+[[- end ]]
 
 job [[ template "job_name" . ]] {
   [[ template "region" . ]]
