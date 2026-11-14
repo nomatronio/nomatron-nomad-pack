@@ -207,7 +207,7 @@ server = {
 secrets = {
   encryption_key = "REPLACE-WITH-openssl-rand-base64-32-STABLE"
   license_key    = "REPLACE-WITH-YOUR-LICENSE-KEY"
-  cluster_key    = "nomatron-cluster-key"
+  cluster_key    = "$NOMATRON_CLUSTER_KEY"
 }
 ```
 
@@ -220,8 +220,8 @@ Recommended for production when Vault is not available. Create the variable firs
 ```bash
 nomad var put nomad/jobs/nomatron/nomatron-server/nomatron \
   encryption_key="$(openssl rand -base64 32)" \
-  license_key="REPLACE-WITH-YOUR-LICENSE-KEY" \
-  cluster_key="REPLACE-WITH-YOUR-CLUSTER-KEY" \
+  license_key="$NOMATRON_LICENSE_KEY" \
+  cluster_key="$(openssl rand -base64 32)" \
   db_url="postgres://nomatron:REPLACE@db-writer.example.com:5432/nomatron?sslmode=require"
 ```
 
@@ -343,7 +343,7 @@ server = {
 secrets = {
   encryption_key = "REPLACE-WITH-openssl-rand-base64-32-STABLE"
   license_key    = "REPLACE-WITH-YOUR-LICENSE-KEY"
-  cluster_key    = "nomatron-cluster-key"
+  cluster_key    = "$NOMATRON_CLUSTER_KEY"
 }
 ```
 
@@ -420,7 +420,7 @@ serf = {
 secrets = {
   encryption_key = "REPLACE-WITH-openssl-rand-base64-32-STABLE"
   license_key    = "REPLACE-WITH-YOUR-LICENSE-KEY"
-  cluster_key    = "nomatron-cluster-key"
+  cluster_key    = "$NOMATRON_CLUSTER_KEY"
 }
 ```
 
@@ -450,7 +450,7 @@ postgres = {
 secrets = {
   encryption_key = "REPLACE-WITH-openssl-rand-base64-32"
   license_key    = "REPLACE-WITH-YOUR-LICENSE-KEY"
-  cluster_key    = "nomatron-cluster-key"
+  cluster_key    = "$NOMATRON_CLUSTER_KEY"
 }
 ```
 
@@ -499,7 +499,7 @@ serf = {
 secrets = {
   encryption_key = "REPLACE-WITH-openssl-rand-base64-32-STABLE"
   license_key    = "REPLACE-WITH-YOUR-LICENSE-KEY"
-  cluster_key    = "nomatron-cluster-key"
+  cluster_key    = "$NOMATRON_CLUSTER_KEY"
 }
 ```
 
@@ -533,7 +533,7 @@ database = {
 secrets = {
   encryption_key = "REPLACE-WITH-openssl-rand-base64-32"
   license_key    = "REPLACE-WITH-YOUR-LICENSE-KEY"
-  cluster_key    = "REPLACE-WITH-YOUR-CLUSTER-KEY"
+  cluster_key    = "$NOMATRON_CLUSTER_KEY"
 }
 ```
 
@@ -674,7 +674,7 @@ Full setup: [Secrets management guide](https://github.com/nomatronio/nomatron-no
 |---|---|
 | `encryption_key` | `openssl rand -base64 32` — stable for the lifetime of a database |
 | `license_key` | Nomatron license key (see below) |
-| `cluster_key` | Issued with your license — must match across all Nomatron servers |
+| `cluster_key` | Generate with `openssl rand -base64 32`. Nomatron does not issue or store cluster keys. Back it up; every server must use the same value for the life of the database. |
 | `db_url` | Full Postgres URL (`sslmode=require`) when using `nomad_var` or `vault` |
 | `serf_encrypt_key` | `nomatron keygen` — required for HA when using `nomad_var` or `vault` |
 
@@ -684,7 +684,7 @@ Full setup: [Secrets management guide](https://github.com/nomatronio/nomatron-no
 |---|---|
 | `secrets.encryption_key` | Same as `encryption_key` above |
 | `secrets.license_key` | Nomatron license key |
-| `secrets.cluster_key` | Issued with your license |
+| `secrets.cluster_key` | Generate with `openssl rand -base64 32`. Nomatron does not issue or store this key; back it up. |
 | `serf.encrypt_key` | Required when `count > 1` |
 
 ### Nomad Variables (production)
@@ -692,8 +692,8 @@ Full setup: [Secrets management guide](https://github.com/nomatronio/nomatron-no
 ```bash
 nomad var put nomad/jobs/nomatron/nomatron-server/nomatron \
   encryption_key="$(openssl rand -base64 32)" \
-  license_key="YOUR-LICENSE-KEY" \
-  cluster_key="YOUR-CLUSTER-KEY" \
+  license_key="$NOMATRON_LICENSE_KEY" \
+  cluster_key="$(openssl rand -base64 32)" \
   db_url="postgres://nomatron:SECRET@db-writer.example.com:5432/nomatron?sslmode=require"
 ```
 
@@ -703,19 +703,30 @@ Deploy with `secrets_backend = "nomad_var"` and `secrets_nomad_var.path` set to 
 
 Store the same keys in Vault KV v2 and set `secrets_backend = "vault"` with `secrets_vault.path` (for example `secret/data/nomatron/production`). Nomad clients must have Vault integration enabled.
 
-### Getting a license key
+### Getting a license key and cluster key
 
-Nomatron is in **early access**. You need a license key and matching `cluster_key` before the server will start in connected licensing mode (the pack default).
+Nomatron is in **early access**. In connected licensing mode (the pack default) the server needs a license key and a cluster key before it will start.
 
 1. **Request early access** at [nomatron.io](https://nomatron.io) — use **Get early access** on the homepage.
-2. After approval, Nomatron will provide your **`license_key`** and **`cluster_key`** for `secrets` in your vars file.
-3. Set both in every example block above (replace `REPLACE-WITH-YOUR-LICENSE-KEY` and use the issued `cluster_key` — do not use a placeholder like `dev`).
+2. After approval, Nomatron will provide your **`license_key`**. Set it as `$NOMATRON_LICENSE_KEY` (or replace `REPLACE-WITH-YOUR-LICENSE-KEY` in a vars file).
+3. **Generate the cluster key yourself.** Nomatron does not issue or store cluster keys, and cannot recover a lost key. Back it up with the encryption key. Every server that shares the database must use the same value for the life of the installation.
 
-A placeholder `cluster_key` will fail connected licensing even with a valid license key. Use the values issued for your environment.
+   Write it into a Nomad Variable (recommended for production):
+
+   ```bash
+   CLUSTER_KEY="$(openssl rand -base64 32)"
+   # Keep a copy of $CLUSTER_KEY in your secret store. It cannot be recovered later.
+   nomad var put nomad/jobs/nomatron/nomatron-server/nomatron \
+     encryption_key="$(openssl rand -base64 32)" \
+     license_key="$NOMATRON_LICENSE_KEY" \
+     cluster_key="$CLUSTER_KEY"
+   ```
+
+   For a homelab only, put the generated value in `secrets.cluster_key`. Do not use a short placeholder such as `dev`.
 
 More on licensing during early access: [Nomatron FAQ](https://nomatron.io/faq).
 
-Generate `encryption_key` and `serf.encrypt_key` yourself. For production, store them in Nomad Variables or Vault — not in committed vars files.
+Generate `encryption_key` (`openssl rand -base64 32`) and, when `count > 1`, `serf.encrypt_key` (`nomatron keygen`) yourself. For production, store all of these in Nomad Variables or Vault — not in committed vars files.
 
 ---
 

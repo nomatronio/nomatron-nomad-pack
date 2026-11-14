@@ -19,10 +19,12 @@ Nomad Variables are encrypted at rest and scoped by ACL. Tasks read them at allo
 Use the job-scoped path convention `nomad/jobs/<job>/<group>/<task>`:
 
 ```bash
+# Generate the cluster key yourself, then store it. Nomatron does not issue or
+# store cluster keys and cannot recover a lost value. Back it up.
 nomad var put nomad/jobs/nomatron/nomatron-server/nomatron \
   encryption_key="$(openssl rand -base64 32)" \
-  license_key="YOUR-LICENSE-KEY" \
-  cluster_key="YOUR-CLUSTER-KEY" \
+  license_key="$NOMATRON_LICENSE_KEY" \
+  cluster_key="$(openssl rand -base64 32)" \
   db_url="postgres://nomatron:SECRET@db-writer.example.com:5432/nomatron?sslmode=require"
 ```
 
@@ -119,8 +121,8 @@ Use Vault when you already operate Vault for secrets, rotation, and audit.
 ```bash
 vault kv put secret/nomatron/production \
   encryption_key="$(openssl rand -base64 32)" \
-  license_key="YOUR-LICENSE-KEY" \
-  cluster_key="YOUR-CLUSTER-KEY" \
+  license_key="$NOMATRON_LICENSE_KEY" \
+  cluster_key="$(openssl rand -base64 32)" \
   db_url="postgres://nomatron:SECRET@db-writer.example.com:5432/nomatron?sslmode=require" \
   serf_encrypt_key="$(nomatron keygen)"
 ```
@@ -156,7 +158,7 @@ See [examples/production.byodb.vault.vars.hcl.example](../../examples/production
 |---|---|---|
 | `encryption_key` | Yes | `NOMATRON_ENCRYPTION_KEY` — stable for the life of the database |
 | `license_key` | Yes | `NOMATRON_LICENSE_KEY` |
-| `cluster_key` | Yes | `NOMATRON_CLUSTER_KEY` — identical on all HA nodes |
+| `cluster_key` | Yes | `NOMATRON_CLUSTER_KEY` — generate with `openssl rand -base64 32`. Nomatron does not issue or store cluster keys. Back it up; identical on every server for the life of the database. |
 | `db_url` | BYODB | `NOMATRON_DB_URL` — full Postgres URL with `sslmode=require` |
 | `serf_encrypt_key` | HA (`count > 1`); optional for single-server | `${NOMAD_SECRETS_DIR}/secrets/serf.key` when using `nomad_var` or `vault` (any `count`) — Nomatron **v0.1.1+** reads it via `--serf-encrypt-key-file` (never under `local/`). Same `secret_change_mode` as other runtime templates. |
 | `root_password` | Optional bootstrap | `NOMATRON_ROOT_PASSWORD` |

@@ -2,8 +2,8 @@
 #
 #   nomad var put nomad/jobs/nomatron/nomatron-server/nomatron \
 #     encryption_key="$(openssl rand -base64 32)" \
-#     license_key="YOUR-LICENSE-KEY" \
-#     cluster_key="YOUR-CLUSTER-KEY" \
+#     license_key="$NOMATRON_LICENSE_KEY" \
+#     cluster_key="$(openssl rand -base64 32)" \
 #     db_url="postgres://nomatron:SECRET@db-writer.example.com:5432/nomatron?sslmode=require"
 #
 #   cp examples/production.byodb.nomad-var.vars.hcl.example production.vars.hcl
