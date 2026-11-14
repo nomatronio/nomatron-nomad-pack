@@ -292,7 +292,7 @@ runtime            = "binary"
 
 binary_install_method = "host"
 binary_path           = "/usr/bin/nomatron"
-nomatron_version      = "v0.1.0-rc.45"
+nomatron_version      = "v0.1.7"
 
 # Alternative: binary_install_method = "artifact", binary_arch = "amd64"
 
@@ -741,7 +741,7 @@ Generate `encryption_key` (`openssl rand -base64 32`) and, when `count > 1`, `se
 - `register_grpc_service` — Traefik TCP service for Host Agent gRPC (default `false`)
 - `agent_grpc_advertise_addr` — public TCP `host:port` Host Agents dial (not the HTTPS URL)
 - `server.tls_enabled` — origin TLS; empty cert paths load PEMs from Nomad Variables (`tls_cert` / `tls_key` / `tls_ca`)
-- `nomatron_version` — release tag (default `v0.1.0-rc.45`; HA on Nomad requires this or later)
+- `nomatron_version` — release tag (default `v0.1.7`; HA on Nomad requires v0.1.0-rc.45 or later)
 - `count` — server instances
 - `node_pool`, `constraints` — dedicated client placement
 - `server`, `database`, `postgres`, `serf`, `bootstrap` — see `nomad-pack info nomatron`

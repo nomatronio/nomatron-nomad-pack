@@ -30,9 +30,9 @@ variable "load_balancer_mode" {
 }
 
 variable "nomatron_version" {
-  description = "Nomatron release version tag (for example v0.1.1). Used for container image and binary artifact URLs. HA on Nomad requires v0.1.0-rc.45 or later so Serf registration uses NOMAD_HOST_IP_serf. secrets_backend=nomad_var or vault requires v0.1.1+ for --serf-encrypt-key-file."
+  description = "Nomatron release version tag (for example v0.1.7). Used for container image and binary artifact URLs. Images come only from ghcr.io/nomatronio/nomatron-releases with a pinned v-tag, never :latest. HA on Nomad requires v0.1.0-rc.45 or later so Serf registration uses NOMAD_HOST_IP_serf. secrets_backend=nomad_var or vault requires v0.1.1+ for --serf-encrypt-key-file."
   type        = string
-  default     = "v0.1.0-rc.45"
+  default     = "v0.1.7"
 }
 
 # ---------------------------------------------------------------------------
