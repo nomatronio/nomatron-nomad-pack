@@ -117,7 +117,7 @@ jobs:
           delete-branch: true
           title: "nomatron: sync pack ${{ needs.validate.outputs.tag }}"
           body: |
-            Automated sync from [nomatronio/nomatron-pack@${{ needs.validate.outputs.tag }}](https://github.com/nomatronio/nomatron-pack/releases/tag/${{ needs.validate.outputs.tag }}).
+            Automated sync from [nomatronio/nomatron-nomad-pack@${{ needs.validate.outputs.tag }}](https://github.com/nomatronio/nomatron-nomad-pack/releases/tag/${{ needs.validate.outputs.tag }}).
 
             ## Maintainer checklist
 
@@ -127,7 +127,7 @@ jobs:
 
             ## Source
 
-            - Repository: https://github.com/nomatronio/nomatron-pack
+            - Repository: https://github.com/nomatronio/nomatron-nomad-pack
             - Tag: `${{ needs.validate.outputs.tag }}`
           labels: |
             pack

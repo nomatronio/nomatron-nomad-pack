@@ -1,4 +1,4 @@
-# nomatron-pack
+# nomatron-nomad-pack
 
 Official [Nomad Pack](https://developer.hashicorp.com/nomad/tools/nomad-pack) for deploying [Nomatron](https://nomatron.io) on HashiCorp Nomad.
 
@@ -11,7 +11,7 @@ Maintainers: [CONTRIBUTING.md](CONTRIBUTING.md)
 ## Repository layout
 
 ```text
-nomatron-pack/
+nomatron-nomad-pack/
 ├── packs/nomatron/     # Synced to community registry (templates, vars, README, …)
 ├── docs/               # Platform guides (repo only)
 ├── examples/           # Copy of example vars (repo only; HCL also in pack README)
@@ -65,8 +65,8 @@ You need permission to register jobs in the target namespace (default `default`)
 #### Option A — Clone and run locally
 
 ```bash
-git clone https://github.com/nomatronio/nomatron-pack.git
-cd nomatron-pack/packs/nomatron
+git clone https://github.com/nomatronio/nomatron-nomad-pack.git
+cd nomatron-nomad-pack/packs/nomatron
 
 nomad-pack info .
 ```
@@ -83,7 +83,7 @@ nomad-pack run nomatron --var-file=production.vars.hcl
 
 ```bash
 nomad-pack registry add nomatronio \
-  github.com/nomatronio/nomatron-pack \
+  github.com/nomatronio/nomatron-nomad-pack \
   --target=nomatron
 
 nomad-pack list --registry=nomatronio
@@ -94,7 +94,7 @@ Pin a release:
 
 ```bash
 nomad-pack registry add nomatronio \
-  github.com/nomatronio/nomatron-pack \
+  github.com/nomatronio/nomatron-nomad-pack \
   --target=nomatron \
   --ref=v0.2.0
 ```
