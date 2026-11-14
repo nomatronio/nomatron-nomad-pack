@@ -207,7 +207,7 @@ server = {
 secrets = {
   encryption_key = "REPLACE-WITH-openssl-rand-base64-32-STABLE"
   license_key    = "REPLACE-WITH-YOUR-LICENSE-KEY"
-  cluster_key    = "$NOMATRON_CLUSTER_KEY"
+  cluster_key    = "REPLACE-WITH-openssl-rand-base64-32-CLUSTER-KEY"
 }
 ```
 
@@ -233,6 +233,7 @@ database_mode        = "byodb"
 network_mode         = "bridge"
 secrets_backend      = "nomad_var"
 
+# Leave path empty to derive nomad/jobs/<job>/<group>. An explicit path still wins.
 secrets_nomad_var = {
   path = "nomad/jobs/nomatron/nomatron-server"
 }
@@ -343,7 +344,7 @@ server = {
 secrets = {
   encryption_key = "REPLACE-WITH-openssl-rand-base64-32-STABLE"
   license_key    = "REPLACE-WITH-YOUR-LICENSE-KEY"
-  cluster_key    = "$NOMATRON_CLUSTER_KEY"
+  cluster_key    = "REPLACE-WITH-openssl-rand-base64-32-CLUSTER-KEY"
 }
 ```
 
@@ -420,7 +421,7 @@ serf = {
 secrets = {
   encryption_key = "REPLACE-WITH-openssl-rand-base64-32-STABLE"
   license_key    = "REPLACE-WITH-YOUR-LICENSE-KEY"
-  cluster_key    = "$NOMATRON_CLUSTER_KEY"
+  cluster_key    = "REPLACE-WITH-openssl-rand-base64-32-CLUSTER-KEY"
 }
 ```
 
@@ -450,7 +451,7 @@ postgres = {
 secrets = {
   encryption_key = "REPLACE-WITH-openssl-rand-base64-32"
   license_key    = "REPLACE-WITH-YOUR-LICENSE-KEY"
-  cluster_key    = "$NOMATRON_CLUSTER_KEY"
+  cluster_key    = "REPLACE-WITH-openssl-rand-base64-32-CLUSTER-KEY"
 }
 ```
 
@@ -499,7 +500,7 @@ serf = {
 secrets = {
   encryption_key = "REPLACE-WITH-openssl-rand-base64-32-STABLE"
   license_key    = "REPLACE-WITH-YOUR-LICENSE-KEY"
-  cluster_key    = "$NOMATRON_CLUSTER_KEY"
+  cluster_key    = "REPLACE-WITH-openssl-rand-base64-32-CLUSTER-KEY"
 }
 ```
 
@@ -533,7 +534,7 @@ database = {
 secrets = {
   encryption_key = "REPLACE-WITH-openssl-rand-base64-32"
   license_key    = "REPLACE-WITH-YOUR-LICENSE-KEY"
-  cluster_key    = "$NOMATRON_CLUSTER_KEY"
+  cluster_key    = "REPLACE-WITH-openssl-rand-base64-32-CLUSTER-KEY"
 }
 ```
 
@@ -674,7 +675,7 @@ Full setup: [Secrets management guide](https://github.com/nomatronio/nomatron-no
 |---|---|
 | `encryption_key` | `openssl rand -base64 32` — stable for the lifetime of a database |
 | `license_key` | Nomatron license key (see below) |
-| `cluster_key` | Generate with `openssl rand -base64 32`. Nomatron does not issue or store cluster keys. Back it up; every server must use the same value for the life of the database. |
+| `cluster_key` | Generate with `openssl rand -base64 32` unless your licence email includes one. Back it up; every server must use the same value for the life of the database (the server records it on first start and refuses a different value). |
 | `db_url` | Full Postgres URL (`sslmode=require`) when using `nomad_var` or `vault` |
 | `serf_encrypt_key` | `nomatron keygen` — required for HA when using `nomad_var` or `vault` |
 
@@ -686,7 +687,7 @@ Full setup: [Secrets management guide](https://github.com/nomatronio/nomatron-no
 |---|---|
 | `secrets.encryption_key` | Same as `encryption_key` above |
 | `secrets.license_key` | Nomatron license key |
-| `secrets.cluster_key` | Generate with `openssl rand -base64 32`. Nomatron does not issue or store this key; back it up. |
+| `secrets.cluster_key` | Generate with `openssl rand -base64 32` unless your licence email includes one; back it up. |
 | `serf.encrypt_key` | Required when `count > 1` |
 
 ### Nomad Variables (production)
@@ -699,7 +700,7 @@ nomad var put nomad/jobs/nomatron/nomatron-server \
   db_url="postgres://nomatron:SECRET@db-writer.example.com:5432/nomatron?sslmode=require"
 ```
 
-Deploy with `secrets_backend = "nomad_var"` and `secrets_nomad_var.path` set to that path. See [Production (Nomad Variables)](#production-nomad-variables).
+Deploy with `secrets_backend = "nomad_var"`. Leave `secrets_nomad_var.path` empty to derive the group path, or set it explicitly (an explicit path still wins). See [Production (Nomad Variables)](#production-nomad-variables).
 
 ### Vault (production)
 
@@ -711,7 +712,7 @@ Nomatron is in **early access**. In connected licensing mode (the pack default) 
 
 1. **Request early access** at [nomatron.io](https://nomatron.io) — use **Get early access** on the homepage.
 2. After approval, Nomatron will provide your **`license_key`**. Set it as `$NOMATRON_LICENSE_KEY` (or replace `REPLACE-WITH-YOUR-LICENSE-KEY` in a vars file).
-3. **Generate the cluster key yourself.** Nomatron does not issue or store cluster keys, and cannot recover a lost key. Back it up with the encryption key. Every server that shares the database must use the same value for the life of the installation.
+3. **Generate the cluster key yourself** with `openssl rand -base64 32`, unless your licence email includes one. Back it up with the encryption key: there is no way to recover it. Every server that shares the database must use the same value for the life of the installation. The server records it on first start and refuses to start with a different value.
 
    Write it into a Nomad Variable (recommended for production):
 

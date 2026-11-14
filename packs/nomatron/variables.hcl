@@ -424,7 +424,7 @@ variable "secrets" {
 }
 
 variable "secrets_nomad_var" {
-  description = "Nomad Variable path and key names when secrets_backend=nomad_var. Default path is the group path nomad/jobs/nomatron/nomatron-server so both the nomatron task and the database-init prestart task can read it via workload identity. A sibling task path (…/nomatron-server/nomatron) is readable by the main task only. If you change job_name, set this path to nomad/jobs/<job>/nomatron-server."
+  description = "Nomad Variable path and key names when secrets_backend=nomad_var. Leave path empty to use the group path nomad/jobs/<job>/<group> (nomad/jobs/nomatron/nomatron-server by default; group nomatron for quickstart provision with count = 1), which both the nomatron task and the database-init prestart task can read via workload identity. A task path (…/nomatron-server/nomatron) is readable by the nomatron task only."
   type = object({
     path = string
     keys = object({
@@ -437,7 +437,7 @@ variable "secrets_nomad_var" {
     })
   })
   default = {
-    path = "nomad/jobs/nomatron/nomatron-server"
+    path = ""
     keys = {
       encryption_key   = "encryption_key"
       license_key      = "license_key"

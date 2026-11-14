@@ -39,7 +39,7 @@ Secrets(must stay stable for this environment) :
 [[- if eq $secretsBackend "pack_vars" ]]
 [] encryption_key, license_key, cluster_key — in vars file ; same values on every redeploy
 [[- else if eq $secretsBackend "nomad_var" ]]
-[] Nomad Variable at [[ var "secrets_nomad_var.path" . ]] — encryption_key, license_key, cluster_key, db_url[[ if gt (var "count" .) 1 ]], serf_encrypt_key[[ end ]]
+[] Nomad Variable at [[ coalesce (var "secrets_nomad_var.path" .) (printf "nomad/jobs/%s/%s" (coalesce (var "job_name" .) (meta "pack.name" .)) (ternary "nomatron" "nomatron-server" (and (eq (var "database_mode" .) "provision") (eq (var "count" .) 1)))) ]] — encryption_key, license_key, cluster_key, db_url[[ if gt (var "count" .) 1 ]], serf_encrypt_key[[ end ]]
 [[- else ]]
 [] Vault secret at [[ var "secrets_vault.path" . ]] — encryption_key, license_key, cluster_key, db_url[[ if gt (var "count" .) 1 ]], serf_encrypt_key[[ end ]]
 [[- end ]]

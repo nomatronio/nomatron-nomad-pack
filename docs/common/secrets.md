@@ -16,13 +16,24 @@ Nomad Variables are encrypted at rest and scoped by ACL. Tasks read them at allo
 
 ### 1. Create the variable
 
-Use the **group** path `nomad/jobs/<job>/<group>` (default `nomad/jobs/nomatron/nomatron-server`). Both the `nomatron` server task and the `database-init` prestart task can read that path through Nomad workload identity. Do not use the sibling task path `nomad/jobs/nomatron/nomatron-server/nomatron`: the main task can read it, but `database-init` cannot, so auto-init fails.
+Use the **group** path `nomad/jobs/<job>/<group>` (default `nomad/jobs/nomatron/nomatron-server`; for quickstart `database_mode=provision` with `count = 1` the group is `nomatron`, so `nomad/jobs/nomatron/nomatron`). If you leave `secrets_nomad_var.path` empty, the pack uses this path for you. Both the `nomatron` server task and the `database-init` prestart task can read that path through Nomad workload identity. Do not use the sibling task path `nomad/jobs/nomatron/nomatron-server/nomatron`: the main task can read it, but `database-init` cannot, so auto-init fails.
 
-If you already created the task-level Variable, move the items up one level (or keep that path only if you leave `bootstrap.auto_init_database = false` and do not need the prestart task to read secrets).
+If you already created the task-level Variable, you can keep using it by setting `secrets_nomad_var.path` to it explicitly, as long as `bootstrap.auto_init_database` stays `false`. To use auto-init, copy the items to the group path without changing any value (a changed `cluster_key` or `encryption_key` stops the server starting), redeploy, and remove the old Variable only once the job is healthy:
 
 ```bash
-# Generate the cluster key yourself, then store it. Nomatron does not issue or
-# store cluster keys and cannot recover a lost value. Back it up.
+OLD=nomad/jobs/nomatron/nomatron-server/nomatron
+NEW=nomad/jobs/nomatron/nomatron-server
+nomad var put "$NEW" \
+  encryption_key="$(nomad var get -item=encryption_key "$OLD")" \
+  license_key="$(nomad var get -item=license_key "$OLD")" \
+  cluster_key="$(nomad var get -item=cluster_key "$OLD")" \
+  db_url="$(nomad var get -item=db_url "$OLD")"
+# Add serf_encrypt_key, root_password and tls_* the same way if you use them.
+```
+
+```bash
+# Generate the cluster key yourself (unless your licence email includes one) and
+# back it up. The server records it on first start and refuses a different value later.
 nomad var put nomad/jobs/nomatron/nomatron-server \
   encryption_key="$(openssl rand -base64 32)" \
   license_key="$NOMATRON_LICENSE_KEY" \
@@ -160,7 +171,7 @@ See [examples/production.byodb.vault.vars.hcl.example](../../examples/production
 |---|---|---|
 | `encryption_key` | Yes | `NOMATRON_ENCRYPTION_KEY` — stable for the life of the database |
 | `license_key` | Yes | `NOMATRON_LICENSE_KEY` |
-| `cluster_key` | Yes | `NOMATRON_CLUSTER_KEY` — generate with `openssl rand -base64 32`. Nomatron does not issue or store cluster keys. Back it up; identical on every server for the life of the database. |
+| `cluster_key` | Yes | `NOMATRON_CLUSTER_KEY` — generate with `openssl rand -base64 32` unless your licence email includes one. Back it up; identical on every server for the life of the database (the server records it on first start and refuses a different value). |
 | `db_url` | BYODB | `NOMATRON_DB_URL` — full Postgres URL with `sslmode=require` |
 | `serf_encrypt_key` | Required when `count > 1` | Written to `${NOMAD_SECRETS_DIR}/secrets/serf.key` and passed as `--serf-encrypt-key-file` only when `count > 1` (`nomad_var` or `vault`; Nomatron **v0.1.1+**). A single server does not need a Serf gossip key. Same `secret_change_mode` as other runtime templates. |
 | `root_password` | Optional bootstrap | `NOMATRON_ROOT_PASSWORD` |

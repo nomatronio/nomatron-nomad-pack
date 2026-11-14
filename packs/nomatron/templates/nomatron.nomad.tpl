@@ -129,9 +129,9 @@ job [[ template "job_name" . ]] {
     [[ template "nomatron_server_task" . ]]
 
     [[- if and (var "bootstrap.auto_init_database" .) (eq (var "database_mode" .) "byodb") (eq (var "count" .) 1) ]]
-    # Reads the same Nomad Variable as the nomatron task (secrets_nomad_var.path).
-    # Use the group path nomad/jobs/<job>/nomatron-server so this prestart task
-    # can read it via workload identity; a sibling task path is not readable here.
+    # Reads the same Nomad Variable as the nomatron task: secrets_nomad_var.path
+    # if set, otherwise the derived group path nomad/jobs/<job>/<group>. A sibling
+    # task path is not readable here via workload identity.
     task "database-init" {
       lifecycle {
         hook    = "prestart"
