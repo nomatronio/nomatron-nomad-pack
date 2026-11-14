@@ -360,14 +360,14 @@ variable "licensing" {
 }
 
 variable "telemetry" {
-  description = "Nomatron telemetry settings."
+  description = "Nomatron telemetry settings. v0.1.7 is off by default (opt-in). The pack default matches that."
   type = object({
     enabled     = bool
     http_proxy  = string
     https_proxy = string
   })
   default = {
-    enabled     = true
+    enabled     = false
     http_proxy  = ""
     https_proxy = ""
   }
