@@ -160,7 +160,7 @@ See [examples/production.byodb.vault.vars.hcl.example](../../examples/production
 | `license_key` | Yes | `NOMATRON_LICENSE_KEY` |
 | `cluster_key` | Yes | `NOMATRON_CLUSTER_KEY` — generate with `openssl rand -base64 32`. Nomatron does not issue or store cluster keys. Back it up; identical on every server for the life of the database. |
 | `db_url` | BYODB | `NOMATRON_DB_URL` — full Postgres URL with `sslmode=require` |
-| `serf_encrypt_key` | HA (`count > 1`); optional for single-server | `${NOMAD_SECRETS_DIR}/secrets/serf.key` when using `nomad_var` or `vault` (any `count`) — Nomatron **v0.1.1+** reads it via `--serf-encrypt-key-file` (never under `local/`). Same `secret_change_mode` as other runtime templates. |
+| `serf_encrypt_key` | Required when `count > 1` | Written to `${NOMAD_SECRETS_DIR}/secrets/serf.key` and passed as `--serf-encrypt-key-file` only when `count > 1` (`nomad_var` or `vault`; Nomatron **v0.1.1+**). A single server does not need a Serf gossip key. Same `secret_change_mode` as other runtime templates. |
 | `root_password` | Optional bootstrap | `NOMATRON_ROOT_PASSWORD` |
 | `tls_cert` / `tls_key` / `tls_ca` | Origin TLS (`server.tls_enabled`, empty file paths) | `${NOMAD_SECRETS_DIR}/tls/*.pem` — rename via `tls_secrets_keys` |
 

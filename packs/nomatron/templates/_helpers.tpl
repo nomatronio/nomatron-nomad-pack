@@ -280,7 +280,7 @@ EOH
 [[- end -]]
 
 [[- define "nomatron_serf_encrypt_key_secret_template" -]]
-[[- if ne (var "secrets_backend" .) "pack_vars" ]]
+[[- if and (gt (var "count" .) 1) (ne (var "secrets_backend" .) "pack_vars") ]]
 [[- $path := var "secrets_nomad_var.path" . -]]
 [[- $kSerf := coalesce (var "secrets_nomad_var.keys.serf_encrypt_key" .) "serf_encrypt_key" -]]
 [[- $vPath := var "secrets_vault.path" . -]]
@@ -308,7 +308,7 @@ EOH
 
 [[- define "nomatron_server_args" -]]
 [[- $args := list "server" "--config" "${NOMAD_TASK_DIR}/config/nomatron.hcl" -]]
-[[- if ne (var "secrets_backend" .) "pack_vars" -]]
+[[- if and (gt (var "count" .) 1) (ne (var "secrets_backend" .) "pack_vars") -]]
 [[- $args = append $args "--serf-encrypt-key-file=${NOMAD_SECRETS_DIR}/secrets/serf.key" -]]
 [[- end -]]
 [[ $args | toStringList ]]
