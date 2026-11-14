@@ -16,12 +16,14 @@ Nomad Variables are encrypted at rest and scoped by ACL. Tasks read them at allo
 
 ### 1. Create the variable
 
-Use the job-scoped path convention `nomad/jobs/<job>/<group>/<task>`:
+Use the **group** path `nomad/jobs/<job>/<group>` (default `nomad/jobs/nomatron/nomatron-server`). Both the `nomatron` server task and the `database-init` prestart task can read that path through Nomad workload identity. Do not use the sibling task path `nomad/jobs/nomatron/nomatron-server/nomatron`: the main task can read it, but `database-init` cannot, so auto-init fails.
+
+If you already created the task-level Variable, move the items up one level (or keep that path only if you leave `bootstrap.auto_init_database = false` and do not need the prestart task to read secrets).
 
 ```bash
 # Generate the cluster key yourself, then store it. Nomatron does not issue or
 # store cluster keys and cannot recover a lost value. Back it up.
-nomad var put nomad/jobs/nomatron/nomatron-server/nomatron \
+nomad var put nomad/jobs/nomatron/nomatron-server \
   encryption_key="$(openssl rand -base64 32)" \
   license_key="$NOMATRON_LICENSE_KEY" \
   cluster_key="$(openssl rand -base64 32)" \
@@ -31,7 +33,7 @@ nomad var put nomad/jobs/nomatron/nomatron-server/nomatron \
 For HA, add the same Serf key on every server:
 
 ```bash
-nomad var put nomad/jobs/nomatron/nomatron-server/nomatron \
+nomad var put nomad/jobs/nomatron/nomatron-server \
   serf_encrypt_key="$(nomatron keygen)"
 ```
 
@@ -69,7 +71,7 @@ openssl req -x509 -newkey rsa:4096 -sha256 -days 825 -nodes \
   -subj "/CN=nomatron.example.com" \
   -addext "subjectAltName=DNS:nomatron.example.com"
 
-nomad var put nomad/jobs/nomatron/nomatron-server/nomatron \
+nomad var put nomad/jobs/nomatron/nomatron-server \
   tls_cert=@cert.pem \
   tls_key=@key.pem \
   tls_ca=@cert.pem
@@ -94,7 +96,7 @@ With Traefik in front, the pack appends `scheme=https` on the HTTP service. For 
 secrets_backend = "nomad_var"
 
 secrets_nomad_var = {
-  path = "nomad/jobs/nomatron/nomatron-server/nomatron"
+  path = "nomad/jobs/nomatron/nomatron-server"
   # keys = { ... }  # optional — defaults match the put command above
 }
 

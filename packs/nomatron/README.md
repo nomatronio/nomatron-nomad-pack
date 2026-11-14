@@ -218,7 +218,7 @@ For production, prefer [Production (Nomad Variables)](#production-nomad-variable
 Recommended for production when Vault is not available. Create the variable first, then deploy without secrets in the vars file:
 
 ```bash
-nomad var put nomad/jobs/nomatron/nomatron-server/nomatron \
+nomad var put nomad/jobs/nomatron/nomatron-server \
   encryption_key="$(openssl rand -base64 32)" \
   license_key="$NOMATRON_LICENSE_KEY" \
   cluster_key="$(openssl rand -base64 32)" \
@@ -234,7 +234,7 @@ network_mode         = "bridge"
 secrets_backend      = "nomad_var"
 
 secrets_nomad_var = {
-  path = "nomad/jobs/nomatron/nomatron-server/nomatron"
+  path = "nomad/jobs/nomatron/nomatron-server"
 }
 
 load_balancer_mode = "none"
@@ -690,7 +690,7 @@ Full setup: [Secrets management guide](https://github.com/nomatronio/nomatron-no
 ### Nomad Variables (production)
 
 ```bash
-nomad var put nomad/jobs/nomatron/nomatron-server/nomatron \
+nomad var put nomad/jobs/nomatron/nomatron-server \
   encryption_key="$(openssl rand -base64 32)" \
   license_key="$NOMATRON_LICENSE_KEY" \
   cluster_key="$(openssl rand -base64 32)" \
@@ -716,7 +716,7 @@ Nomatron is in **early access**. In connected licensing mode (the pack default) 
    ```bash
    CLUSTER_KEY="$(openssl rand -base64 32)"
    # Keep a copy of $CLUSTER_KEY in your secret store. It cannot be recovered later.
-   nomad var put nomad/jobs/nomatron/nomatron-server/nomatron \
+   nomad var put nomad/jobs/nomatron/nomatron-server \
      encryption_key="$(openssl rand -base64 32)" \
      license_key="$NOMATRON_LICENSE_KEY" \
      cluster_key="$CLUSTER_KEY"

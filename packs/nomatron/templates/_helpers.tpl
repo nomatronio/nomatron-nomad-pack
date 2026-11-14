@@ -99,7 +99,7 @@ constraint {
 [[- end -]]
 [[- if eq $secretsBackend "nomad_var" -]]
 [[- if eq (var "secrets_nomad_var.path" .) "" -]]
-[[ fail "secrets_backend=nomad_var requires secrets_nomad_var.path (for example nomad/jobs/nomatron/nomatron-server/nomatron)." ]]
+[[ fail "secrets_backend=nomad_var requires secrets_nomad_var.path (for example nomad/jobs/nomatron/nomatron-server)." ]]
 [[- end -]]
 [[- else if eq $secretsBackend "vault" -]]
 [[- if eq (var "secrets_vault.path" .) "" -]]

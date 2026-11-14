@@ -98,7 +98,7 @@ count              = 2
 nomatron_version   = "v0.1.1"
 secrets_backend    = "nomad_var"
 secrets_nomad_var = {
-  path = "nomad/jobs/nomatron/nomatron-server/nomatron"
+  path = "nomad/jobs/nomatron/nomatron-server"
 }
 load_balancer_mode = "none"
 register_service   = false

@@ -1,6 +1,6 @@
 # Production — secrets in Nomad Variables (recommended when Vault is not available).
 #
-#   nomad var put nomad/jobs/nomatron/nomatron-server/nomatron \
+#   nomad var put nomad/jobs/nomatron/nomatron-server \
 #     encryption_key="$(openssl rand -base64 32)" \
 #     license_key="$NOMATRON_LICENSE_KEY" \
 #     cluster_key="$(openssl rand -base64 32)" \
@@ -18,7 +18,7 @@ count                = 1
 secrets_backend = "nomad_var"
 
 secrets_nomad_var = {
-  path = "nomad/jobs/nomatron/nomatron-server/nomatron"
+  path = "nomad/jobs/nomatron/nomatron-server"
 }
 
 load_balancer_mode = "none"
