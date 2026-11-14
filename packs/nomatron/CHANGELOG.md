@@ -1,3 +1,16 @@
+## Unreleased
+
+### Fixed
+
+- **Repository URLs:** clone, registry, and docs links now point at `nomatronio/nomatron-nomad-pack` (the previous `nomatronio/nomatron-pack` name 404s).
+- **Wording:** describe the product as early access, not private beta.
+- **Cluster key:** customers generate their own key (for example `openssl rand -base64 32`) and store it in a Nomad Variable. The pack no longer says the key is issued with the license. The reused example value `nomatron-cluster-key` is replaced with the placeholder `$NOMATRON_CLUSTER_KEY`.
+- **Telemetry default:** `telemetry.enabled` defaults to `false`, matching v0.1.7 (off by default).
+- **Default version:** `nomatron_version` defaults to `v0.1.7`. Images come only from `ghcr.io/nomatronio/nomatron-releases` with a pinned v-tag, never `:latest`.
+- **Serf gossip key:** required only when `count > 1`. A single-server `nomad_var` / `vault` job no longer writes `secrets/serf.key` or passes `--serf-encrypt-key-file`.
+- **Nomad Variable path:** default and docs use the group path `nomad/jobs/nomatron/nomatron-server` so the `database-init` prestart task and the `nomatron` task can both read it via workload identity. The sibling task path is not readable by `database-init`.
+- **Render leakage:** document that `nomad-pack render` prints secrets when `secrets_backend=pack_vars`, even with `-o`. Production should use `nomad_var` or `vault`.
+
 ## Version v0.2.11 (2026-10-18)
 
 ### Added
