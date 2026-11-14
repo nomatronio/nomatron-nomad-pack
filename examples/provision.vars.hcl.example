@@ -8,7 +8,7 @@ deployment_profile = "quickstart"
 database_mode      = "provision"
 network_mode  = "bridge"
 
-# Optional: target dedicated clients — see https://github.com/nomatronio/nomatron-pack/tree/main/docs/common/dedicated-nodes-and-placement.md
+# Optional: target dedicated clients — see https://github.com/nomatronio/nomatron-nomad-pack/tree/main/docs/common/dedicated-nodes-and-placement.md
 # node_pool = "infra"
 # constraints = [{ attribute = "$${meta.nomatron}", operator = "=", value = "true" }]
 # Client agent must set matching node_pool and meta { nomatron = "true" }
@@ -26,5 +26,6 @@ postgres = {
 secrets = {
   encryption_key = "REPLACE-WITH-openssl-rand-base64-32"
   license_key    = "REPLACE-WITH-YOUR-LICENSE-KEY"
-  cluster_key    = "nomatron-cluster-key"
+  # Generate with: openssl rand -base64 32 (unless your licence email includes one). Keep it for the life of the database.
+  cluster_key    = "REPLACE-WITH-openssl-rand-base64-32-CLUSTER-KEY"
 }

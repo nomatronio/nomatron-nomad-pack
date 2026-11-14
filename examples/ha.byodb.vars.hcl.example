@@ -11,7 +11,7 @@ database_mode      = "byodb"
 network_mode       = "bridge"
 count              = 3
 
-# Cloud LB → each client :4649 (no Traefik) — see https://github.com/nomatronio/nomatron-pack/tree/main/docs/common/load-balancing.md
+# Cloud LB → each client :4649 (no Traefik) — see https://github.com/nomatronio/nomatron-nomad-pack/tree/main/docs/common/load-balancing.md
 load_balancer_mode = "none"
 register_service   = false
 http_port_static   = 4649
@@ -82,5 +82,6 @@ serf = {
 secrets = {
   encryption_key = "REPLACE-WITH-openssl-rand-base64-32-STABLE"
   license_key    = "REPLACE-WITH-YOUR-LICENSE-KEY"
-  cluster_key    = "nomatron-cluster-key"
+  # Generate with: openssl rand -base64 32 (unless your licence email includes one). Keep it for the life of the database.
+  cluster_key    = "REPLACE-WITH-openssl-rand-base64-32-CLUSTER-KEY"
 }

@@ -66,7 +66,11 @@ if count > 1 and backend in ("nomad_var", "vault") and secret_change_mode != "re
 if re.search(r"encrypt_key\s*=\s*\{\{-?\s*with nomadVar", text):
     sys.exit("serf encrypt_key must not be inline in nomatron.hcl via nomadVar")
 
-if backend in ("nomad_var", "vault"):
+if backend in ("nomad_var", "vault") and count == 1:
+    if "secrets/serf.key" in text or "--serf-encrypt-key-file" in text:
+        sys.exit("single-server nomad_var/vault must not render serf.key or --serf-encrypt-key-file")
+
+if backend in ("nomad_var", "vault") and count > 1:
     if "secrets/serf.key" not in text:
         sys.exit("expected NOMAD_SECRETS_DIR secrets/serf.key template")
     if not re.search(
@@ -98,7 +102,7 @@ count              = 2
 nomatron_version   = "v0.1.1"
 secrets_backend    = "nomad_var"
 secrets_nomad_var = {
-  path = "nomad/jobs/nomatron/nomatron-server/nomatron"
+  path = "nomad/jobs/nomatron/nomatron-server"
 }
 load_balancer_mode = "none"
 register_service   = false
@@ -197,8 +201,8 @@ if grep -q 'change_mode = "noop"' "${JOB}"; then
   echo "did not expect change_mode = noop for count=1 default" >&2
   exit 1
 fi
-if ! grep -q 'secrets/serf.key' "${JOB}"; then
-  echo "expected serf.key template for single-server nomad_var" >&2
+if grep -q 'secrets/serf.key' "${JOB}"; then
+  echo "did not expect serf.key template for single-server nomad_var (Serf key only when count > 1)" >&2
   exit 1
 fi
 

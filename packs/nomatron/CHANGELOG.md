@@ -1,3 +1,19 @@
+## 0.3.0
+
+### Upgrade notes
+
+- **Task-level Nomad Variables:** If you already created a Variable at a task path such as `nomad/jobs/nomatron/nomatron-server/nomatron`, keep setting `secrets_nomad_var.path` to that path explicitly. That still works as long as `bootstrap.auto_init_database` stays `false`. To use auto-init, copy the items to the group path without changing any value — a changed `cluster_key` or `encryption_key` stops the server starting — then redeploy, and remove the old Variable only once the job is healthy. See the copy-then-redeploy steps in [Secrets management](../../docs/common/secrets.md#1-create-the-variable).
+
+### Fixed
+
+- **Repository URLs:** clone, registry, and docs links now point at `nomatronio/nomatron-nomad-pack` (the previous `nomatronio/nomatron-pack` name 404s).
+- **Cluster key:** generate with `openssl rand -base64 32` unless your licence email includes one. The server records the key on first start and refuses a different value later. The reused example value `nomatron-cluster-key` is replaced with the placeholder `REPLACE-WITH-openssl-rand-base64-32-CLUSTER-KEY`.
+- **Telemetry default:** `telemetry.enabled` defaults to `false`, matching v0.1.7 (off by default).
+- **Default version:** `nomatron_version` defaults to `v0.1.7`. Images come only from `ghcr.io/nomatronio/nomatron-releases` with a pinned v-tag, never `:latest`.
+- **Serf gossip key:** required only when `count > 1`. A single-server `nomad_var` / `vault` job no longer writes `secrets/serf.key` or passes `--serf-encrypt-key-file`.
+- **Nomad Variable path:** When `secrets_nomad_var.path` is empty the pack now derives it from the job and group (`nomad/jobs/<job>/nomatron-server`, or `nomad/jobs/<job>/nomatron` for quickstart provision with `count = 1`). An explicit path still wins, so existing installs are unaffected unless they enable auto-init.
+- **Render leakage:** document that `nomad-pack render` prints secrets when `secrets_backend=pack_vars`, even with `-o`. Production should use `nomad_var` or `vault`.
+
 ## Version v0.2.11 (2026-10-18)
 
 ### Added
@@ -80,7 +96,7 @@
 - **Secrets backends:** `secrets_backend` supports `pack_vars` (default), `nomad_var` (recommended for production), and `vault`. Runtime secrets are injected via Nomad template blocks — not stored in the job specification.
 - **Production validation:** `deployment_profile=production|ha` now requires `server.trusted_origins`, and `http_port_static` when `load_balancer_mode=none`.
 - **HA runbook:** post-deploy output documents one-time database initialization for HA.
-- **Secrets guide:** [docs/common/secrets.md](https://github.com/nomatronio/nomatron-pack/blob/main/docs/common/secrets.md)
+- **Secrets guide:** [docs/common/secrets.md](https://github.com/nomatronio/nomatron-nomad-pack/blob/main/docs/common/secrets.md)
 - Example vars: `production.byodb.nomad-var.vars.hcl.example`, `production.byodb.vault.vars.hcl.example`
 
 ### Removed
