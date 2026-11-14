@@ -705,7 +705,7 @@ Store the same keys in Vault KV v2 and set `secrets_backend = "vault"` with `sec
 
 ### Getting a license key
 
-Nomatron is in **private beta**. You need a license key and matching `cluster_key` before the server will start in connected licensing mode (the pack default).
+Nomatron is in **early access**. You need a license key and matching `cluster_key` before the server will start in connected licensing mode (the pack default).
 
 1. **Request early access** at [nomatron.io](https://nomatron.io) — use **Get early access** on the homepage.
 2. After approval, Nomatron will provide your **`license_key`** and **`cluster_key`** for `secrets` in your vars file.
@@ -713,7 +713,7 @@ Nomatron is in **private beta**. You need a license key and matching `cluster_ke
 
 A placeholder `cluster_key` will fail connected licensing even with a valid license key. Use the values issued for your environment.
 
-More on licensing during beta: [Nomatron FAQ](https://nomatron.io/faq).
+More on licensing during early access: [Nomatron FAQ](https://nomatron.io/faq).
 
 Generate `encryption_key` and `serf.encrypt_key` yourself. For production, store them in Nomad Variables or Vault — not in committed vars files.
 
