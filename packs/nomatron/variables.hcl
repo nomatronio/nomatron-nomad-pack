@@ -30,9 +30,9 @@ variable "load_balancer_mode" {
 }
 
 variable "nomatron_version" {
-  description = "Nomatron release version tag (for example v0.1.1). Used for container image and binary artifact URLs. HA on Nomad requires v0.1.0-rc.45 or later so Serf registration uses NOMAD_HOST_IP_serf. secrets_backend=nomad_var or vault requires v0.1.1+ for --serf-encrypt-key-file."
+  description = "Nomatron release version tag (for example v0.1.7). Used for container image and binary artifact URLs. Images come only from ghcr.io/nomatronio/nomatron-releases with a pinned v-tag, never :latest. HA on Nomad requires v0.1.0-rc.45 or later so Serf registration uses NOMAD_HOST_IP_serf. secrets_backend=nomad_var or vault requires v0.1.1+ for --serf-encrypt-key-file."
   type        = string
-  default     = "v0.1.0-rc.45"
+  default     = "v0.1.7"
 }
 
 # ---------------------------------------------------------------------------
@@ -360,14 +360,14 @@ variable "licensing" {
 }
 
 variable "telemetry" {
-  description = "Nomatron telemetry settings."
+  description = "Nomatron telemetry settings. v0.1.7 is off by default (opt-in). The pack default matches that."
   type = object({
     enabled     = bool
     http_proxy  = string
     https_proxy = string
   })
   default = {
-    enabled     = true
+    enabled     = false
     http_proxy  = ""
     https_proxy = ""
   }
@@ -424,7 +424,7 @@ variable "secrets" {
 }
 
 variable "secrets_nomad_var" {
-  description = "Nomad Variable path and key names when secrets_backend=nomad_var. Default path follows Nomad's job-scoped convention: nomad/jobs/<job>/<group>/<task>."
+  description = "Nomad Variable path and key names when secrets_backend=nomad_var. Leave path empty to use the group path nomad/jobs/<job>/<group> (nomad/jobs/nomatron/nomatron-server by default; group nomatron for quickstart provision with count = 1), which both the nomatron task and the database-init prestart task can read via workload identity. A task path (…/nomatron-server/nomatron) is readable by the nomatron task only."
   type = object({
     path = string
     keys = object({

@@ -33,5 +33,6 @@ database = {
 secrets = {
   encryption_key = "REPLACE-WITH-openssl-rand-base64-32"
   license_key    = "REPLACE-WITH-YOUR-LICENSE-KEY"
-  cluster_key    = "REPLACE-WITH-YOUR-CLUSTER-KEY"
+  # Generate with: openssl rand -base64 32 (unless your licence email includes one). Keep it for the life of the database.
+  cluster_key    = "REPLACE-WITH-openssl-rand-base64-32-CLUSTER-KEY"
 }

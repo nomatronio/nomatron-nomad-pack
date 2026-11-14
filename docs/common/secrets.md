@@ -16,20 +16,35 @@ Nomad Variables are encrypted at rest and scoped by ACL. Tasks read them at allo
 
 ### 1. Create the variable
 
-Use the job-scoped path convention `nomad/jobs/<job>/<group>/<task>`:
+Use the **group** path `nomad/jobs/<job>/<group>` (default `nomad/jobs/nomatron/nomatron-server`; for quickstart `database_mode=provision` with `count = 1` the group is `nomatron`, so `nomad/jobs/nomatron/nomatron`). If you leave `secrets_nomad_var.path` empty, the pack uses this path for you. Both the `nomatron` server task and the `database-init` prestart task can read that path through Nomad workload identity. Do not use the sibling task path `nomad/jobs/nomatron/nomatron-server/nomatron`: the main task can read it, but `database-init` cannot, so auto-init fails.
+
+If you already created the task-level Variable, you can keep using it by setting `secrets_nomad_var.path` to it explicitly, as long as `bootstrap.auto_init_database` stays `false`. To use auto-init, copy the items to the group path without changing any value (a changed `cluster_key` or `encryption_key` stops the server starting), redeploy, and remove the old Variable only once the job is healthy:
 
 ```bash
-nomad var put nomad/jobs/nomatron/nomatron-server/nomatron \
+OLD=nomad/jobs/nomatron/nomatron-server/nomatron
+NEW=nomad/jobs/nomatron/nomatron-server
+nomad var put "$NEW" \
+  encryption_key="$(nomad var get -item=encryption_key "$OLD")" \
+  license_key="$(nomad var get -item=license_key "$OLD")" \
+  cluster_key="$(nomad var get -item=cluster_key "$OLD")" \
+  db_url="$(nomad var get -item=db_url "$OLD")"
+# Add serf_encrypt_key, root_password and tls_* the same way if you use them.
+```
+
+```bash
+# Generate the cluster key yourself (unless your licence email includes one) and
+# back it up. The server records it on first start and refuses a different value later.
+nomad var put nomad/jobs/nomatron/nomatron-server \
   encryption_key="$(openssl rand -base64 32)" \
-  license_key="YOUR-LICENSE-KEY" \
-  cluster_key="YOUR-CLUSTER-KEY" \
+  license_key="$NOMATRON_LICENSE_KEY" \
+  cluster_key="$(openssl rand -base64 32)" \
   db_url="postgres://nomatron:SECRET@db-writer.example.com:5432/nomatron?sslmode=require"
 ```
 
 For HA, add the same Serf key on every server:
 
 ```bash
-nomad var put nomad/jobs/nomatron/nomatron-server/nomatron \
+nomad var put nomad/jobs/nomatron/nomatron-server \
   serf_encrypt_key="$(nomatron keygen)"
 ```
 
@@ -67,7 +82,7 @@ openssl req -x509 -newkey rsa:4096 -sha256 -days 825 -nodes \
   -subj "/CN=nomatron.example.com" \
   -addext "subjectAltName=DNS:nomatron.example.com"
 
-nomad var put nomad/jobs/nomatron/nomatron-server/nomatron \
+nomad var put nomad/jobs/nomatron/nomatron-server \
   tls_cert=@cert.pem \
   tls_key=@key.pem \
   tls_ca=@cert.pem
@@ -92,7 +107,7 @@ With Traefik in front, the pack appends `scheme=https` on the HTTP service. For 
 secrets_backend = "nomad_var"
 
 secrets_nomad_var = {
-  path = "nomad/jobs/nomatron/nomatron-server/nomatron"
+  path = "nomad/jobs/nomatron/nomatron-server"
   # keys = { ... }  # optional — defaults match the put command above
 }
 
@@ -119,8 +134,8 @@ Use Vault when you already operate Vault for secrets, rotation, and audit.
 ```bash
 vault kv put secret/nomatron/production \
   encryption_key="$(openssl rand -base64 32)" \
-  license_key="YOUR-LICENSE-KEY" \
-  cluster_key="YOUR-CLUSTER-KEY" \
+  license_key="$NOMATRON_LICENSE_KEY" \
+  cluster_key="$(openssl rand -base64 32)" \
   db_url="postgres://nomatron:SECRET@db-writer.example.com:5432/nomatron?sslmode=require" \
   serf_encrypt_key="$(nomatron keygen)"
 ```
@@ -156,9 +171,9 @@ See [examples/production.byodb.vault.vars.hcl.example](../../examples/production
 |---|---|---|
 | `encryption_key` | Yes | `NOMATRON_ENCRYPTION_KEY` — stable for the life of the database |
 | `license_key` | Yes | `NOMATRON_LICENSE_KEY` |
-| `cluster_key` | Yes | `NOMATRON_CLUSTER_KEY` — identical on all HA nodes |
+| `cluster_key` | Yes | `NOMATRON_CLUSTER_KEY` — generate with `openssl rand -base64 32` unless your licence email includes one. Back it up; identical on every server for the life of the database (the server records it on first start and refuses a different value). |
 | `db_url` | BYODB | `NOMATRON_DB_URL` — full Postgres URL with `sslmode=require` |
-| `serf_encrypt_key` | HA (`count > 1`); optional for single-server | `${NOMAD_SECRETS_DIR}/secrets/serf.key` when using `nomad_var` or `vault` (any `count`) — Nomatron **v0.1.1+** reads it via `--serf-encrypt-key-file` (never under `local/`). Same `secret_change_mode` as other runtime templates. |
+| `serf_encrypt_key` | Required when `count > 1` | Written to `${NOMAD_SECRETS_DIR}/secrets/serf.key` and passed as `--serf-encrypt-key-file` only when `count > 1` (`nomad_var` or `vault`; Nomatron **v0.1.1+**). A single server does not need a Serf gossip key. Same `secret_change_mode` as other runtime templates. |
 | `root_password` | Optional bootstrap | `NOMATRON_ROOT_PASSWORD` |
 | `tls_cert` / `tls_key` / `tls_ca` | Origin TLS (`server.tls_enabled`, empty file paths) | `${NOMAD_SECRETS_DIR}/tls/*.pem` — rename via `tls_secrets_keys` |
 
@@ -166,7 +181,9 @@ Key names are configurable via `secrets_nomad_var.keys` and `secrets_vault.keys`
 
 ## Homelab / CI (`pack_vars`)
 
-For local development, pass secrets via a gitignored `*.vars.hcl`:
+`nomad-pack render` (and `plan` / `run`) will print or store the rendered job, including every secret you put in pack variables. The CLI writes the job to stdout even when you pass `-o`. Do not use `pack_vars` with real secrets. For any shared or production cluster, use `secrets_backend=nomad_var` or `vault` so secrets come only from a Nomad Variable or Vault at runtime.
+
+For local development, pass placeholders via a gitignored `*.vars.hcl`:
 
 ```bash
 nomad-pack run --var-file=mac-dev.vars.hcl .

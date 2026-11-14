@@ -1,9 +1,9 @@
-# Contributing to nomatron-pack
+# Contributing to nomatron-nomad-pack
 
 ## Repository layout
 
 ```text
-nomatron-pack/
+nomatron-nomad-pack/
 ├── packs/nomatron/          # Synced to community registry — 6 items only
 │   ├── templates/
 │   ├── variables.hcl
@@ -62,7 +62,7 @@ packs/nomatron/
 
 On **`v*` tag** push, [`.github/workflows/sync-community-registry.yml`](.github/workflows/sync-community-registry.yml) validates, syncs, and opens an upstream PR.
 
-**Secret:** `COMMUNITY_REGISTRY_SYNC_TOKEN` on `nomatronio/nomatron-pack`.
+**Secret:** `COMMUNITY_REGISTRY_SYNC_TOKEN` on `nomatronio/nomatron-nomad-pack`.
 
 Local dry-run:
 

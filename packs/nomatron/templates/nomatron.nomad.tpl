@@ -1,4 +1,10 @@
 [[ template "validate_deployment" . ]]
+[[- if eq (var "secrets_backend" .) "pack_vars" ]]
+# WARNING: secrets_backend=pack_vars embeds secrets in this job specification.
+# `nomad-pack render` prints the full job to stdout, even when you also pass -o.
+# Use secrets_backend=nomad_var or vault so values come only from a Nomad
+# Variable or Vault and do not appear in the rendered job.
+[[- end ]]
 
 job [[ template "job_name" . ]] {
   [[ template "region" . ]]
@@ -123,6 +129,9 @@ job [[ template "job_name" . ]] {
     [[ template "nomatron_server_task" . ]]
 
     [[- if and (var "bootstrap.auto_init_database" .) (eq (var "database_mode" .) "byodb") (eq (var "count" .) 1) ]]
+    # Reads the same Nomad Variable as the nomatron task: secrets_nomad_var.path
+    # if set, otherwise the derived group path nomad/jobs/<job>/<group>. A sibling
+    # task path is not readable here via workload identity.
     task "database-init" {
       lifecycle {
         hook    = "prestart"

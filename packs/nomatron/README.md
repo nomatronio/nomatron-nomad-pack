@@ -6,9 +6,9 @@ Nomatron is an operational control plane for HashiCorp Nomad. This pack deploys 
 
 This pack is the **primary deployment mechanism** and **reference architecture** for running Nomatron on Nomad.
 
-**Install nomad-pack, get this pack, plan, and run:** see the [nomatron-pack repository README](https://github.com/nomatronio/nomatron-pack/blob/main/README.md#install-and-use-nomad-pack).
+**Install nomad-pack, get this pack, plan, and run:** see the [nomatron-nomad-pack repository README](https://github.com/nomatronio/nomatron-nomad-pack/blob/main/README.md#install-and-use-nomad-pack).
 
-**Platform setup (VM, firewall, Docker, CNI, load balancing):** [docs](https://github.com/nomatronio/nomatron-pack/tree/main/docs/README.md).
+**Platform setup (VM, firewall, Docker, CNI, load balancing):** [docs](https://github.com/nomatronio/nomatron-nomad-pack/tree/main/docs/README.md).
 
 ---
 
@@ -68,9 +68,9 @@ Nomad **1.6+** with at least one client that can run the job. Other requirements
 | Mode | Nomad drivers | Client software | Network | Host volumes | License / secrets |
 |---|---|---|---|---|---|
 | **`provision`** (lab) | **docker** | Docker + **CNI bridge** | `network_mode=bridge` | Postgres data volume | Required |
-| **`byodb`** production/HA | **docker** or **exec** | Docker if `runtime=docker`; exec if `runtime=binary` | Usually `bridge` (or `standard` for macOS BYODB) | None for Nomatron | Required ([or Nomad Variables / Vault](https://github.com/nomatronio/nomatron-pack/blob/main/docs/common/secrets.md)) |
+| **`byodb`** production/HA | **docker** or **exec** | Docker if `runtime=docker`; exec if `runtime=binary` | Usually `bridge` (or `standard` for macOS BYODB) | None for Nomatron | Required ([or Nomad Variables / Vault](https://github.com/nomatronio/nomatron-nomad-pack/blob/main/docs/common/secrets.md)) |
 
-Full client setup walkthrough: [Nomad client setup](https://github.com/nomatronio/nomatron-pack/tree/main/docs/common/nomad-client-setup.md).
+Full client setup walkthrough: [Nomad client setup](https://github.com/nomatronio/nomatron-nomad-pack/tree/main/docs/common/nomad-client-setup.md).
 
 ### Try Nomatron (not the Nomad pack)
 
@@ -88,9 +88,9 @@ Use this pack when you already run Nomad and want Nomatron scheduled alongside y
 
 ### Production / HA
 
-- **Dedicated Nomad clients:** [node_pool, client meta, and constraints](https://github.com/nomatronio/nomatron-pack/tree/main/docs/common/dedicated-nodes-and-placement.md)
-- **Load balancing:** [ALB vs Traefik vs direct access](https://github.com/nomatronio/nomatron-pack/tree/main/docs/common/load-balancing.md)
-- **CNI bridge plugin** when `network_mode=bridge` — see [Nomad client setup](https://github.com/nomatronio/nomatron-pack/tree/main/docs/common/nomad-client-setup.md)
+- **Dedicated Nomad clients:** [node_pool, client meta, and constraints](https://github.com/nomatronio/nomatron-nomad-pack/tree/main/docs/common/dedicated-nodes-and-placement.md)
+- **Load balancing:** [ALB vs Traefik vs direct access](https://github.com/nomatronio/nomatron-nomad-pack/tree/main/docs/common/load-balancing.md)
+- **CNI bridge plugin** when `network_mode=bridge` — see [Nomad client setup](https://github.com/nomatronio/nomatron-nomad-pack/tree/main/docs/common/nomad-client-setup.md)
 - **Host volumes** when `database_mode=provision` only
 
 ### macOS (`nomad agent -dev`)
@@ -112,17 +112,17 @@ CNI bridge does not work on macOS. Use BYODB with **`network_mode=standard`**. S
 
 Required for `network_mode=bridge` (`database_mode=provision`, most production Linux jobs).
 
-See [nomad client setup](https://github.com/nomatronio/nomatron-pack/tree/main/docs/common/nomad-client-setup.md). Install CNI plugins and set `client { cni_path = "/opt/cni/bin" }` on each Linux client.
+See [nomad client setup](https://github.com/nomatronio/nomatron-nomad-pack/tree/main/docs/common/nomad-client-setup.md). Install CNI plugins and set `client { cni_path = "/opt/cni/bin" }` on each Linux client.
 
 ### Nomad version requirements
 
 Save each block below as a `*.vars.hcl` file and pass it with `nomad-pack run --var-file=...`. Replace `REPLACE-*` placeholders before deploy. Do not commit real secrets.
 
-**Lab quickstart:** copy [examples/provision.vars.hcl.example](https://github.com/nomatronio/nomatron-pack/blob/main/examples/provision.vars.hcl.example), fill in secrets, then `nomad-pack run --var-file=your.vars.hcl .`.
+**Lab quickstart:** copy [examples/provision.vars.hcl.example](https://github.com/nomatronio/nomatron-nomad-pack/blob/main/examples/provision.vars.hcl.example), fill in secrets, then `nomad-pack run --var-file=your.vars.hcl .`.
 
 ### Dedicated client placement
 
-Merge into production or HA vars. Client agent must set matching `node_pool` and `meta` — see [dedicated nodes guide](https://github.com/nomatronio/nomatron-pack/tree/main/docs/common/dedicated-nodes-and-placement.md).
+Merge into production or HA vars. Client agent must set matching `node_pool` and `meta` — see [dedicated nodes guide](https://github.com/nomatronio/nomatron-nomad-pack/tree/main/docs/common/dedicated-nodes-and-placement.md).
 
 The pack always constrains to Linux clients (`attr.kernel.name = linux`). In `-var-file` HCL, escape Nomad interpolations as `$${...}` so nomad-pack does not treat them as variables.
 
@@ -207,7 +207,7 @@ server = {
 secrets = {
   encryption_key = "REPLACE-WITH-openssl-rand-base64-32-STABLE"
   license_key    = "REPLACE-WITH-YOUR-LICENSE-KEY"
-  cluster_key    = "nomatron-cluster-key"
+  cluster_key    = "REPLACE-WITH-openssl-rand-base64-32-CLUSTER-KEY"
 }
 ```
 
@@ -218,10 +218,10 @@ For production, prefer [Production (Nomad Variables)](#production-nomad-variable
 Recommended for production when Vault is not available. Create the variable first, then deploy without secrets in the vars file:
 
 ```bash
-nomad var put nomad/jobs/nomatron/nomatron-server/nomatron \
+nomad var put nomad/jobs/nomatron/nomatron-server \
   encryption_key="$(openssl rand -base64 32)" \
-  license_key="REPLACE-WITH-YOUR-LICENSE-KEY" \
-  cluster_key="REPLACE-WITH-YOUR-CLUSTER-KEY" \
+  license_key="$NOMATRON_LICENSE_KEY" \
+  cluster_key="$(openssl rand -base64 32)" \
   db_url="postgres://nomatron:REPLACE@db-writer.example.com:5432/nomatron?sslmode=require"
 ```
 
@@ -233,8 +233,9 @@ database_mode        = "byodb"
 network_mode         = "bridge"
 secrets_backend      = "nomad_var"
 
+# Leave path empty to derive nomad/jobs/<job>/<group>. An explicit path still wins.
 secrets_nomad_var = {
-  path = "nomad/jobs/nomatron/nomatron-server/nomatron"
+  path = "nomad/jobs/nomatron/nomatron-server"
 }
 
 load_balancer_mode = "none"
@@ -292,7 +293,7 @@ runtime            = "binary"
 
 binary_install_method = "host"
 binary_path           = "/usr/bin/nomatron"
-nomatron_version      = "v0.1.0-rc.45"
+nomatron_version      = "v0.1.7"
 
 # Alternative: binary_install_method = "artifact", binary_arch = "amd64"
 
@@ -343,7 +344,7 @@ server = {
 secrets = {
   encryption_key = "REPLACE-WITH-openssl-rand-base64-32-STABLE"
   license_key    = "REPLACE-WITH-YOUR-LICENSE-KEY"
-  cluster_key    = "nomatron-cluster-key"
+  cluster_key    = "REPLACE-WITH-openssl-rand-base64-32-CLUSTER-KEY"
 }
 ```
 
@@ -420,7 +421,7 @@ serf = {
 secrets = {
   encryption_key = "REPLACE-WITH-openssl-rand-base64-32-STABLE"
   license_key    = "REPLACE-WITH-YOUR-LICENSE-KEY"
-  cluster_key    = "nomatron-cluster-key"
+  cluster_key    = "REPLACE-WITH-openssl-rand-base64-32-CLUSTER-KEY"
 }
 ```
 
@@ -450,7 +451,7 @@ postgres = {
 secrets = {
   encryption_key = "REPLACE-WITH-openssl-rand-base64-32"
   license_key    = "REPLACE-WITH-YOUR-LICENSE-KEY"
-  cluster_key    = "nomatron-cluster-key"
+  cluster_key    = "REPLACE-WITH-openssl-rand-base64-32-CLUSTER-KEY"
 }
 ```
 
@@ -499,7 +500,7 @@ serf = {
 secrets = {
   encryption_key = "REPLACE-WITH-openssl-rand-base64-32-STABLE"
   license_key    = "REPLACE-WITH-YOUR-LICENSE-KEY"
-  cluster_key    = "nomatron-cluster-key"
+  cluster_key    = "REPLACE-WITH-openssl-rand-base64-32-CLUSTER-KEY"
 }
 ```
 
@@ -533,7 +534,7 @@ database = {
 secrets = {
   encryption_key = "REPLACE-WITH-openssl-rand-base64-32"
   license_key    = "REPLACE-WITH-YOUR-LICENSE-KEY"
-  cluster_key    = "REPLACE-WITH-YOUR-CLUSTER-KEY"
+  cluster_key    = "REPLACE-WITH-openssl-rand-base64-32-CLUSTER-KEY"
 }
 ```
 
@@ -586,7 +587,7 @@ For HA with binary runtime, add `runtime = "binary"` and `binary_*` settings to 
 
 ## Load balancer
 
-See [load balancing guide](https://github.com/nomatronio/nomatron-pack/tree/main/docs/common/load-balancing.md).
+See [load balancing guide](https://github.com/nomatronio/nomatron-nomad-pack/tree/main/docs/common/load-balancing.md).
 
 | Mode | When to use |
 |---|---|
@@ -596,7 +597,7 @@ See [load balancing guide](https://github.com/nomatronio/nomatron-pack/tree/main
 
 **Cloud production default:** ALB → each client on **4649** — no Traefik required.
 
-Host Agent gRPC is a **separate TCP** path (`register_grpc_service`, `agent_grpc_advertise_addr`). See [Host Agent gRPC](https://github.com/nomatronio/nomatron-pack/blob/main/docs/common/load-balancing.md#host-agent-grpc-traefik-tcp).
+Host Agent gRPC is a **separate TCP** path (`register_grpc_service`, `agent_grpc_advertise_addr`). See [Host Agent gRPC](https://github.com/nomatronio/nomatron-nomad-pack/blob/main/docs/common/load-balancing.md#host-agent-grpc-traefik-tcp).
 
 ### TLS
 
@@ -621,7 +622,7 @@ server = {
 }
 ```
 
-Advanced: set `server.tls_enabled = true` for origin TLS (required for Host Agent gRPC passthrough). Leave `tls_cert_file` / `tls_key_file` empty to load PEMs from Nomad Variables or Vault — see [secrets](https://github.com/nomatronio/nomatron-pack/blob/main/docs/common/secrets.md#origin-tls-pems-optional). Traefik then uses HTTPS to Nomatron; edge TLS (ALB, Pinggy) can stay in front.
+Advanced: set `server.tls_enabled = true` for origin TLS (required for Host Agent gRPC passthrough). Leave `tls_cert_file` / `tls_key_file` empty to load PEMs from Nomad Variables or Vault — see [secrets](https://github.com/nomatronio/nomatron-nomad-pack/blob/main/docs/common/secrets.md#origin-tls-pems-optional). Traefik then uses HTTPS to Nomatron; edge TLS (ALB, Pinggy) can stay in front.
 
 ### CSRF and `trusted_origins`
 
@@ -666,7 +667,7 @@ Choose how secrets reach the Nomatron task:
 | **`vault`** | Production with HashiCorp Vault |
 | **`pack_vars`** | Homelab / quickstart — pass via `-var-file`; **not for production** |
 
-Full setup: [Secrets management guide](https://github.com/nomatronio/nomatron-pack/blob/main/docs/common/secrets.md).
+Full setup: [Secrets management guide](https://github.com/nomatronio/nomatron-nomad-pack/blob/main/docs/common/secrets.md).
 
 ### Keys (all backends)
 
@@ -674,55 +675,68 @@ Full setup: [Secrets management guide](https://github.com/nomatronio/nomatron-pa
 |---|---|
 | `encryption_key` | `openssl rand -base64 32` — stable for the lifetime of a database |
 | `license_key` | Nomatron license key (see below) |
-| `cluster_key` | Issued with your license — must match across all Nomatron servers |
+| `cluster_key` | Generate with `openssl rand -base64 32` unless your licence email includes one. Back it up; every server must use the same value for the life of the database (the server records it on first start and refuses a different value). |
 | `db_url` | Full Postgres URL (`sslmode=require`) when using `nomad_var` or `vault` |
 | `serf_encrypt_key` | `nomatron keygen` — required for HA when using `nomad_var` or `vault` |
 
 ### `pack_vars` (homelab only)
 
+`nomad-pack render` prints the rendered job, including these values, even when you also pass `-o`. Use this backend only with placeholders in a gitignored vars file. Production should use `nomad_var` or `vault`.
+
 | Variable | Description |
 |---|---|
 | `secrets.encryption_key` | Same as `encryption_key` above |
 | `secrets.license_key` | Nomatron license key |
-| `secrets.cluster_key` | Issued with your license |
+| `secrets.cluster_key` | Generate with `openssl rand -base64 32` unless your licence email includes one; back it up. |
 | `serf.encrypt_key` | Required when `count > 1` |
 
 ### Nomad Variables (production)
 
 ```bash
-nomad var put nomad/jobs/nomatron/nomatron-server/nomatron \
+nomad var put nomad/jobs/nomatron/nomatron-server \
   encryption_key="$(openssl rand -base64 32)" \
-  license_key="YOUR-LICENSE-KEY" \
-  cluster_key="YOUR-CLUSTER-KEY" \
+  license_key="$NOMATRON_LICENSE_KEY" \
+  cluster_key="$(openssl rand -base64 32)" \
   db_url="postgres://nomatron:SECRET@db-writer.example.com:5432/nomatron?sslmode=require"
 ```
 
-Deploy with `secrets_backend = "nomad_var"` and `secrets_nomad_var.path` set to that path. See [Production (Nomad Variables)](#production-nomad-variables).
+Deploy with `secrets_backend = "nomad_var"`. Leave `secrets_nomad_var.path` empty to derive the group path, or set it explicitly (an explicit path still wins). See [Production (Nomad Variables)](#production-nomad-variables).
 
 ### Vault (production)
 
 Store the same keys in Vault KV v2 and set `secrets_backend = "vault"` with `secrets_vault.path` (for example `secret/data/nomatron/production`). Nomad clients must have Vault integration enabled.
 
-### Getting a license key
+### Getting a license key and cluster key
 
-Nomatron is in **private beta**. You need a license key and matching `cluster_key` before the server will start in connected licensing mode (the pack default).
+Nomatron is in **early access**. In connected licensing mode (the pack default) the server needs a license key and a cluster key before it will start.
 
 1. **Request early access** at [nomatron.io](https://nomatron.io) — use **Get early access** on the homepage.
-2. After approval, Nomatron will provide your **`license_key`** and **`cluster_key`** for `secrets` in your vars file.
-3. Set both in every example block above (replace `REPLACE-WITH-YOUR-LICENSE-KEY` and use the issued `cluster_key` — do not use a placeholder like `dev`).
+2. After approval, Nomatron will provide your **`license_key`**. Set it as `$NOMATRON_LICENSE_KEY` (or replace `REPLACE-WITH-YOUR-LICENSE-KEY` in a vars file).
+3. **Generate the cluster key yourself** with `openssl rand -base64 32`, unless your licence email includes one. Back it up with the encryption key: there is no way to recover it. Every server that shares the database must use the same value for the life of the installation. The server records it on first start and refuses to start with a different value.
 
-A placeholder `cluster_key` will fail connected licensing even with a valid license key. Use the values issued for your environment.
+   Write it into a Nomad Variable (recommended for production):
 
-More on licensing during beta: [Nomatron FAQ](https://nomatron.io/faq).
+   ```bash
+   CLUSTER_KEY="$(openssl rand -base64 32)"
+   # Keep a copy of $CLUSTER_KEY in your secret store. It cannot be recovered later.
+   nomad var put nomad/jobs/nomatron/nomatron-server \
+     encryption_key="$(openssl rand -base64 32)" \
+     license_key="$NOMATRON_LICENSE_KEY" \
+     cluster_key="$CLUSTER_KEY"
+   ```
 
-Generate `encryption_key` and `serf.encrypt_key` yourself. For production, store them in Nomad Variables or Vault — not in committed vars files.
+   For a homelab only, put the generated value in `secrets.cluster_key`. Do not use a short placeholder such as `dev`.
+
+More on licensing during early access: [Nomatron FAQ](https://nomatron.io/faq).
+
+Generate `encryption_key` (`openssl rand -base64 32`) and, when `count > 1`, `serf.encrypt_key` (`nomatron keygen`) yourself. For production, store all of these in Nomad Variables or Vault — not in committed vars files.
 
 ---
 
 ## Key variables
 
 - `secrets_backend` — `pack_vars`, `nomad_var`, or `vault`
-- `secret_change_mode` — Nomad template `change_mode` for runtime secrets/TLS (`""` → `noop` when `count > 1`, `restart` when `count = 1`; see [Secrets management](https://github.com/nomatronio/nomatron-pack/blob/main/docs/common/secrets.md))
+- `secret_change_mode` — Nomad template `change_mode` for runtime secrets/TLS (`""` → `noop` when `count > 1`, `restart` when `count = 1`; see [Secrets management](https://github.com/nomatronio/nomatron-nomad-pack/blob/main/docs/common/secrets.md))
 - `deployment_profile` — `quickstart`, `production`, or `ha`
 - `database_mode` — `provision` (lab default) or `byodb`
 - `runtime` — `docker` or `binary`
@@ -730,7 +744,7 @@ Generate `encryption_key` and `serf.encrypt_key` yourself. For production, store
 - `register_grpc_service` — Traefik TCP service for Host Agent gRPC (default `false`)
 - `agent_grpc_advertise_addr` — public TCP `host:port` Host Agents dial (not the HTTPS URL)
 - `server.tls_enabled` — origin TLS; empty cert paths load PEMs from Nomad Variables (`tls_cert` / `tls_key` / `tls_ca`)
-- `nomatron_version` — release tag (default `v0.1.0-rc.45`; HA on Nomad requires this or later)
+- `nomatron_version` — release tag (default `v0.1.7`; HA on Nomad requires v0.1.0-rc.45 or later)
 - `count` — server instances
 - `node_pool`, `constraints` — dedicated client placement
 - `server`, `database`, `postgres`, `serf`, `bootstrap` — see `nomad-pack info nomatron`
@@ -747,7 +761,7 @@ Run `nomad-pack info .` (or `nomad-pack info nomatron` from the registry) for th
 | 4650 | Agent gRPC (task listen port; Traefik TCP entrypoint when using Host Agents) |
 | 7946 | Serf gossip (HA) |
 
-Host Agents enroll over HTTPS and then dial **gRPC over TCP**. Do not advertise the HTTPS reverse proxy (`:443`) as the gRPC address — set `agent_grpc_advertise_addr` and `register_grpc_service`. See [Host Agent gRPC](https://github.com/nomatronio/nomatron-pack/blob/main/docs/common/load-balancing.md#host-agent-grpc-traefik-tcp).
+Host Agents enroll over HTTPS and then dial **gRPC over TCP**. Do not advertise the HTTPS reverse proxy (`:443`) as the gRPC address — set `agent_grpc_advertise_addr` and `register_grpc_service`. See [Host Agent gRPC](https://github.com/nomatronio/nomatron-nomad-pack/blob/main/docs/common/load-balancing.md#host-agent-grpc-traefik-tcp).
 
 Leave `serf.advertise_addr` empty. The group port label `serf` interpolates:
 
@@ -776,7 +790,7 @@ Starting points for dedicated clients (2 vCPU, 4 GiB RAM minimum per node):
 | **ha** | 3 | `m7i.large` × 3 | `e2-standard-2` × 3 | `Standard_D2s_v5` × 3 |
 | **quickstart** | 1 | `t3.large` | `e2-standard-2` | `Standard_D2s_v5` |
 
-Full platform guides: [docs](https://github.com/nomatronio/nomatron-pack/tree/main/docs/README.md).
+Full platform guides: [docs](https://github.com/nomatronio/nomatron-nomad-pack/tree/main/docs/README.md).
 
 ---
 
@@ -792,12 +806,12 @@ Full platform guides: [docs](https://github.com/nomatronio/nomatron-pack/tree/ma
 
 ## License
 
-This pack is [MPL-2.0](https://github.com/nomatronio/nomatron-pack/blob/main/LICENSE). Deploying Nomatron requires a valid [Nomatron license key](https://nomatron.io) in `secrets.license_key`.
+This pack is [MPL-2.0](https://github.com/nomatronio/nomatron-nomad-pack/blob/main/LICENSE). Deploying Nomatron requires a valid [Nomatron license key](https://nomatron.io) in `secrets.license_key`.
 
 ## References
 
-- [nomatron-pack README](https://github.com/nomatronio/nomatron-pack/blob/main/README.md) — install and use nomad-pack
-- [Platform setup guides](https://github.com/nomatronio/nomatron-pack/tree/main/docs)
+- [nomatron-nomad-pack README](https://github.com/nomatronio/nomatron-nomad-pack/blob/main/README.md) — install and use nomad-pack
+- [Platform setup guides](https://github.com/nomatronio/nomatron-nomad-pack/tree/main/docs)
 - [Nomad Pack documentation](https://developer.hashicorp.com/nomad/tools/nomad-pack)
 - [Nomatron AWS reference architecture](https://github.com/nomatronio/reference-architecture/tree/main/aws)
 - [Nomatron container images](https://github.com/nomatronio/nomatron-releases)
